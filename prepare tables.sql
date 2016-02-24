@@ -3,7 +3,7 @@
 	nazov	varchar(40) NOT NULL
 );
 
-DROP TABLE t_fve;
+DROP TABLE t_produkcia;
 
 INSERT INTO t_lokalita VALUES
 	(DEFAULT, 'Dubravy'),
@@ -25,8 +25,16 @@ INSERT INTO t_fve VALUES
 	(DEFAULT, 'FVE Dubravy 2', 0.850, 901.641, (SELECT id FROM t_lokalita WHERE nazov = 'Dubravy') ),
 	(DEFAULT, 'FVE Plesivec', 0.984, 1150, (SELECT id FROM t_lokalita WHERE nazov = 'Plesivec') );
 
-CREATE TABLE t_produkcia (
+CREATE TABLE t_produkcia_den (
+	id	serial	primary key,
+	datum 	date NOT NULL,
+	vykon	real,
+	fve	integer	references t_fve(id)
+);
+
+CREATE TABLE t_produkcia_hodina (
 	id	serial	primary key,
 	cas 	timestamp NOT NULL,
-	fve	integer	references t_fve(id)
+	vykon	real,
+	produkcia_den	integer	references t_produkcia_den(id)
 );
