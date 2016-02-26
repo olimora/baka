@@ -18,3 +18,5 @@ cas_ok <- within(bez_null_gho, cas <- paste(datum, cas, sep=' '))
 pripravene <- cas_ok[2:8]
 
 pripravene[,c("cas", "gho", "oblacnost", "teplota", "rychlost_vetra", "vlhkost", "tlak")]
+
+files<-list.files("C:\\000\\skola\\baka\\data\\Aladin\\gho")

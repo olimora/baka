@@ -77,7 +77,9 @@ CREATE TABLE t_predpoved_import (
 
 select * from t_predpoved_import
 
-DELETE FROM t_predpoved_import
+DELETE FROM t_predpoved_import;
+DELETE FROM t_predpoved_hodina;
+DELETE FROM t_predpoved_den;
 
 COPY t_predpoved_import FROM 'C:\000\skola\baka\data\Aladin\gho\2014-08\ALADIN-DUB_48.587_19.369-2014-08.csv' WITH DELIMITER ','
 
@@ -93,3 +95,5 @@ UPDATE t_predpoved_hodina h SET predpoved_den = (SELECT d.id FROM t_predpoved_de
 
 select * from t_lokalita l, t_predpoved_den d, t_predpoved_hodina h where l.id = d.lokalita and d.id = h.predpoved_den order by h.cas, l.nazov ASC
 select * from t_predpoved_den
+
+DROP FUNCTION import_aladin_csv(text)

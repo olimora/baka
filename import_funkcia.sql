@@ -1,10 +1,10 @@
 ﻿CREATE OR REPLACE FUNCTION import_aladin_csv(subor text)
-RETURNS void AS $$
+RETURNS integer AS $$
 BEGIN
 -------------------------------------------------------------------------------------------------------
 DELETE FROM t_predpoved_import;
 -------------------------------------------------------------------------------------------------------
-EXECUTE format('COPY t_predpoved_import FROM %L WITH DELIMITER ',';', subor);
+EXECUTE format('COPY t_predpoved_import FROM %L WITH DELIMITER ' || quote_literal(',') || ';', subor);
 -------------------------------------------------------------------------------------------------------
 INSERT INTO t_predpoved_hodina (cas, gho, oblacnost, teplota, rychlost_vetra, vlhkost, tlak) 
 	(SELECT to_timestamp(datum || ' ' || cas, 'DD-MM-YYYY HH24:MI') cas, gho, oblacnost, 
@@ -41,6 +41,7 @@ UPDATE t_predpoved_hodina h
 	WHERE h.predpoved_den IS NULL;
 
 END IF;
+RETURN 1;
 -------------------------------------------------------------------------------------------------------
 END;
 $$ LANGUAGE plpgsql
