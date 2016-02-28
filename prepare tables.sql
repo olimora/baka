@@ -39,7 +39,14 @@ CREATE TABLE t_produkcia_hodina (
 	produkcia_den	integer	references t_produkcia_den(id)
 );
 
-select * from t_produkcia_hodina
+CREATE TABLE t_produkcia_import (
+	id	serial	primary key,
+	in_cas	varchar(40),
+	in_vykon	varchar(20),
+	in_fve	varchar(40),
+	cas 	timestamp,
+	vykon	real
+);
 
 CREATE TABLE t_predpoved_den (
 	id	serial	primary key,
@@ -75,25 +82,3 @@ CREATE TABLE t_predpoved_import (
 );
 
 
-select * from t_predpoved_import
-
-DELETE FROM t_predpoved_import;
-DELETE FROM t_predpoved_hodina;
-DELETE FROM t_predpoved_den;
-
-COPY t_predpoved_import FROM 'C:\000\skola\baka\data\Aladin\gho\2014-08\ALADIN-DUB_48.587_19.369-2014-08.csv' WITH DELIMITER ','
-
-INSERT INTO t_predpoved_hodina (cas, gho, oblacnost, teplota, rychlost_vetra, vlhkost, tlak) 
-	(SELECT to_timestamp(datum || ' ' || cas, 'DD-MM-YYYY HH24:MI') cas, gho, oblacnost, teplota, rychlost_vetra, vlhkost, tlak FROM t_predpoved_import WHERE gho > 0)
-
-INSERT INTO t_predpoved_den (lokalita, datum)
-	(SELECT DISTINCT 	(select id from t_lokalita where nazov = 'Dubravy') lokalita, 
-				to_date(to_char(cas, 'YYYY-MM-DD'),'YYYY-MM-DD') datum 
-		FROM t_predpoved_hodina WHERE predpoved_den IS NULL ORDER BY datum 	)
-
-UPDATE t_predpoved_hodina h SET predpoved_den = (SELECT d.id FROM t_predpoved_den d WHERE to_char(d.datum, 'YYYY-MM-DD') = to_char(h.cas, 'YYYY-MM-DD')) WHERE h.predpoved_den IS NULL
-
-select * from t_lokalita l, t_predpoved_den d, t_predpoved_hodina h where l.id = d.lokalita and d.id = h.predpoved_den order by h.cas, l.nazov ASC
-select * from t_predpoved_den
-
-DROP FUNCTION import_aladin_csv(text)

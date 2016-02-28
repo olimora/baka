@@ -24,3 +24,6 @@ UPDATE t_predpoved_hodina h
 SELECT import_aladin_csv('C:\\000\skola\baka\data\Aladin\gho\2014-10\ALADIN-PLE_48.544_20.400-2014-10.csv');
 
 select datum, lokalita from t_predpoved_den group by datum, lokalita order by datum desc
+
+-----------------------------------------------------------------------------------------------------
+

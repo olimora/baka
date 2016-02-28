@@ -41,6 +41,7 @@ UPDATE t_predpoved_hodina h
 	WHERE h.predpoved_den IS NULL;
 
 END IF;
+DELETE FROM t_predpoved_import;
 RETURN 1;
 -------------------------------------------------------------------------------------------------------
 END;
