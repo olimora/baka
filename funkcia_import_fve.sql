@@ -1,20 +1,22 @@
-﻿CREATE OR REPLACE FUNCTION import_fve_csv(subor text)
-RETURNS integer AS $$
+﻿CREATE OR REPLACE FUNCTION import_fve_csv()
+RETURNS integer AS 
+$$
 BEGIN
 ------------------------------------------------------------------------------------------------------------------------------
---update cas na timestamp + vynulovat minuty
-UPDATE t_produkcia_import i
-	SET cas = to_timestamp(i.in_cas, 'DD.MM.YYYY HH24:00'); --upravit cas na UTC 
-	--prec letny cas
-UPDATE t_produkcia_import i
-	SET cas = (cas - make_interval(hours => 1))
-	WHERE cas > to_timestamp('2015-03-29 03:00', 'YYYY-MM-DD HH24:Min')
-	AND cas < to_timestamp('2015-10-25 03:00', 'YYYY-MM-DD HH24:Min')
+SET timezone='CET';
+--update cas na timestamp v UTC
+UPDATE t_produkcia_import t
+	SET cas_cet = to_timestamp(t.in_cas, 'DD.MM.YYYY HH24:MI'); 
+SET timezone='UTC';
+UPDATE t_produkcia_import t
+	SET cas = cas_cet at time zone 'UTC'; 
+UPDATE t_produkcia_import t
+	SET group_by_cas = to_timestamp(to_char(cas, 'YYYY-MM-DD HH24:00'), 'YYYY-MM-DD HH24:MI')
+	WHERE cast(to_char(cas, 'MI') as integer) <= 30; 
+UPDATE t_produkcia_import t
+	SET group_by_cas = to_timestamp(to_char(cas, 'YYYY-MM-DD HH24:00'), 'YYYY-MM-DD HH24:MI') + '1 hours'
+	WHERE cast(to_char(cas, 'MI') as integer) > 30; 
 ------------------------------------------------------------------------------------------------------------------------------
---vymazat tie, pre ktore nie je predpoved
---DELETE 
-SELECT * FROM t_produkcia_import WHERE cas NOT IN (SELECT cas FROM t_predpoved_hodina) order by cas, in_cas
-------------------------------------------------------------------------------------------------------------------------------		
 --update vykon 
 UPDATE t_produkcia_import
 	SET vykon = (select cast(in_vykon as real))
@@ -35,19 +37,16 @@ INSERT INTO t_produkcia_den (datum, vykon, fve)
 --insert into _hodina, vykon, den_id
 INSERT INTO t_produkcia_hodina (cas, vykon, produkcia_den) 
 	(SELECT cas, vykon, produkcia_den FROM
-		(select cas, sum(vykon) vykon, (SELECT id FROM t_produkcia_den WHERE datum = to_date(to_char(cas, 'YYYY-MM-DD'), 'YYYY-MM-DD') 
-			and fve = (SELECT id FROM t_fve WHERE nazov = in_fve)) produkcia_den, in_fve
+		(select group_by_cas cas, sum(vykon) vykon, (SELECT id FROM t_produkcia_den WHERE datum = to_date(to_char(group_by_cas, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+			and fve = (SELECT id FROM t_fve WHERE nazov = in_fve)) produkcia_den, in_fve, group_by_cas
 			from t_produkcia_import
-			group by in_fve, cas
-			order by in_fve, cas) s1);
+			group by in_fve, group_by_cas
+			order by in_fve, group_by_cas) s1);
 ------------------------------------------------------------------------------------------------------------------------------
-DELETE FROM t_produkcia_import;
+--DELETE FROM t_produkcia_import;
+------------------------------------------------------------------------------------------------------------------------------
 RETURN 1;
 ------------------------------------------------------------------------------------------------------------------------------
 END;
-$$ LANGUAGE plpgsql
-
-111330 + 111330 * 1160 = 129 254 130
-111330 + 27832.5 + 27832.5 * 1160 = 32 424 862.5
-
-select cast('132342' as double precision)
+$$ 
+LANGUAGE plpgsql

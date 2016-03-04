@@ -20,3 +20,7 @@ pripravene <- cas_ok[2:8]
 pripravene[,c("cas", "gho", "oblacnost", "teplota", "rychlost_vetra", "vlhkost", "tlak")]
 
 files<-list.files("C:\\000\\skola\\baka\\data\\Aladin\\gho")
+
+lll <- "(),(),(),"
+
+gsub(",$", ";", lll) 

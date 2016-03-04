@@ -2,12 +2,14 @@
 RETURNS integer AS 
 $$
 DECLARE
+	zimny_slnovrat_2013 date;
 	zimny_slnovrat_2014 date;
 	zimny_slnovrat_2015 date;
 	zimny_slnovrat_2016 date; 
 	lokalita_id integer;
 BEGIN
 -------------------------------------------------------------------------------------------------------
+zimny_slnovrat_2013 = to_date('2013-12-21','YYYY-MM-DD');
 zimny_slnovrat_2014 = to_date('2014-12-22','YYYY-MM-DD');
 zimny_slnovrat_2015 = to_date('2015-12-22','YYYY-MM-DD');
 zimny_slnovrat_2016 = to_date('2016-12-21','YYYY-MM-DD');
@@ -34,7 +36,7 @@ END IF;
 INSERT INTO t_predpoved_den (lokalita, datum)
 	(SELECT DISTINCT lokalita_id lokalita, 
 		to_date(to_char(cas, 'YYYY-MM-DD'),'YYYY-MM-DD') datum 
-		FROM t_predpoved_hodina --WHERE predpoved_den IS NULL --zrejme netreba
+		FROM t_predpoved_hodina WHERE predpoved_den IS NULL --zrejme netreba
 		ORDER BY datum);
 
 UPDATE t_predpoved_hodina h 
@@ -46,12 +48,14 @@ UPDATE t_predpoved_hodina h
 -------------------------------------------------------------------------------------------------------
 UPDATE t_predpoved_den t
 	SET sklon = (select MIN(sklon) from (
+			(select abs(zimny_slnovrat_2013 - t.datum) sklon) 
+			UNION
 			(select abs(zimny_slnovrat_2014 - t.datum) sklon) 
 			UNION 
 			(select abs(zimny_slnovrat_2015 - t.datum) sklon) 
 			UNION 
 			(select abs(zimny_slnovrat_2016 - t.datum) sklon)
-					) s1)
+					) s1) + 1
 	WHERE t.sklon IS NULL;	
 -------------------------------------------------------------------------------------------------------
 DELETE FROM t_predpoved_import;
