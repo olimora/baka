@@ -8,10 +8,10 @@ BEGIN
 -------------------------------------------------------------------------------------------------------
 DROP TABLE IF EXISTS t_produkcia_import;
 DROP TABLE IF EXISTS t_predpoved_import;
-DROP TABLE IF EXISTS t_predpoved_hodina;
-DROP TABLE IF EXISTS t_predpoved_den;
 DROP TABLE IF EXISTS t_produkcia_hodina;
 DROP TABLE IF EXISTS t_produkcia_den;
+DROP TABLE IF EXISTS t_predpoved_hodina;
+DROP TABLE IF EXISTS t_predpoved_den;
 DROP TABLE IF EXISTS t_fve;
 DROP TABLE IF EXISTS t_lokalita;
 -------------------------------------------------------------------------------------------------------
@@ -35,20 +35,6 @@ INSERT INTO t_fve (nazov, instalovany_vykon, rocny_predpoklad, lokalita) VALUES
 	('FVE Dubravy 2', 0.850, 901.641, (SELECT id FROM t_lokalita WHERE nazov = 'Dubravy') ),
 	('FVE Plesivec', 0.984, 1150, (SELECT id FROM t_lokalita WHERE nazov = 'Plesivec') );
 
-CREATE TABLE t_produkcia_den (
-	id	serial		PRIMARY KEY,
-	fve	integer		REFERENCES t_fve ON DELETE SET NULL,
-	datum 	date 		NOT NULL,
-	vykon	real	
-);
-
-CREATE TABLE t_produkcia_hodina (
-	id		serial		PRIMARY KEY,
-	produkcia_den	integer		REFERENCES t_produkcia_den ON DELETE SET NULL,
-	cas 		timestamp 	NOT NULL,
-	vykon		real	
-);
-
 CREATE TABLE t_predpoved_den (
 	id		serial		PRIMARY KEY,
 	lokalita	integer		REFERENCES t_lokalita ON DELETE SET NULL,
@@ -67,6 +53,22 @@ CREATE TABLE t_predpoved_hodina (
 	rychlost_vetra	smallint,
 	vlhkost		smallint,
 	tlak		smallint
+);
+
+CREATE TABLE t_produkcia_den (
+	id		serial		PRIMARY KEY,
+	fve		integer		REFERENCES t_fve ON DELETE SET NULL,
+	predpoved	integer		REFERENCES t_predpoved_den ON DELETE SET NULL,
+	datum 		date 		NOT NULL,
+	vykon		real	
+);
+
+CREATE TABLE t_produkcia_hodina (
+	id		serial		PRIMARY KEY,
+	produkcia_den	integer		REFERENCES t_produkcia_den ON DELETE SET NULL,
+	predpoved	integer		REFERENCES t_predpoved_hodina ON DELETE SET NULL,
+	cas 		timestamp 	NOT NULL,
+	vykon		real	
 );
 
 CREATE TABLE t_produkcia_import (

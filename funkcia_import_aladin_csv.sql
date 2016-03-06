@@ -24,7 +24,6 @@ INSERT INTO t_predpoved_hodina (cas, gho, oblacnost, teplota, rychlost_vetra, vl
 	(SELECT to_timestamp(datum || ' ' || cas, 'DD-MM-YYYY HH24:MI') cas, gho, oblacnost, 
 			teplota, rychlost_vetra, vlhkost, tlak 
 		FROM t_predpoved_import); 
-		--WHERE gho > 0); -- pozriet ktore mozem vymazat z gho 0 a fve 0
 -------------------------------------------------------------------------------------------------------
 IF subor like '%DUB%' THEN 
 	SELECT id INTO lokalita_id FROM t_lokalita WHERE nazov = 'Dubravy';

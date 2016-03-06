@@ -47,3 +47,30 @@ and t3.produkcia_den = t4.id
 and t4.fve = 1
 and t1.cas = t3.cas)
 TO 'C:\000\data_export.csv' WITH DELIMITER AS ';'
+
+
+select * from t_predpoved_den t2
+where 	t2.lokalita = 1 and 
+	t2.datum NOT IN (SELECT x1.datum FROM t_produkcia_den x1 where x1.fve = 1 or x1.fve = 2)
+
+select * from t_predpoved_den where id NOT IN (
+select t1.id 
+from t_predpoved_den t1, t_produkcia_den t3, t_fve t4
+where 	t3.fve = t4.id 
+	and t1.lokalita = t4.lokalita
+	and t1.datum = t3.datum)
+
+
+
+select * from t_produkcia_den where fve = 3 and datum IN 
+((select to_date('2015-07-26','YYYY-MM-DD')) UNION (select to_date('2015-07-27','YYYY-MM-DD')) 
+UNION (select to_date('2015-07-28','YYYY-MM-DD')) UNION (select to_date('2015-07-29','YYYY-MM-DD')) 
+UNION (select to_date('2015-07-30','YYYY-MM-DD')))
+
+
+
+
+
+
+
+
