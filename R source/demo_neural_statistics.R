@@ -46,8 +46,20 @@ statistics <- data.frame(N=integer(), MBE=double(), RMBE=double(), RMSE=double()
                          MAE=double(), RMAE=double(), SD=double(), MPE=double())
 
 newrow <- modeval(cleanoutput[,3], cleanoutput[,2],
-        stat=c("N","MBE","RMBE","RMSE","RRMSE","MAE","RMAE","SD","MPE"),minlength=4)
+        stat=c("N","MBE","RMBE","RMSE","RRMSE","MAE","RMAE","MPE","SD"),minlength=4)
+#MSE, MAXAE
 
 statistics[(nrow(statistics) + 1) ,] <- unlist(newrow)
 
+install.packages('oce')
+library("oce")
 
+a <- sun.angle("2015-08-15 12:00:00", 48.593646, 19.374655)
+
+
+install.packages('insol')
+library("insol")
+
+hourangle(JDymd(2015,08,15,23,0,0), 19.374655, 1)
+
+sunpos(sunvector(JDymd(2015,08,15,14,0,0), 48.593646, 19.374655, 1))
