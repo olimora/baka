@@ -36,31 +36,24 @@ files <- list.files(path, recursive = T, full.names = T)
 for(i in 1:length(files)) {
   content_of_file <- read.csv2(files[i], row.names=NULL)
   # vybranie iba riadkov s datami a stlpcov Cas, vykon a praca
-  only_wanted <- content_of_file[c(3:nrow(content_of_file)),c(1,3,9)]
-  only_wanted[,3] <- as.numeric(as.character(only_wanted[,3]))
+  only_wanted <- content_of_file[c(3:nrow(content_of_file)),c(1,9)]
+  only_wanted[,2] <- as.numeric(as.character(only_wanted[,2]))
   # vytiahnutie elektrarne
   elektraren <- sub("/Ktab.*", "", sub(".*fve/", "", files[i]))
   # vyskladanie insertu
   insert_query <- " INSERT INTO t_produkcia_import 
-                      (in_cas, in_vykon, praca, in_fve) VALUES "
-  insert_query <- paste0(insert_query, "('", only_wanted[1,1], "','", 
-                        gsub(",", ".", only_wanted[1,2]), "',", 
-                        0, ",'",
-                        elektraren, "'),")
+                      (in_cas, in_praca, praca, in_fve) VALUES "
+  insert_query <- paste0(insert_query, "('", only_wanted[1,1], "',", 
+                  only_wanted[1,2], ",", 0, ",'", elektraren, "'),")
   for(j in 2:nrow(only_wanted)) {
-    insert_query <- paste0(insert_query, "('", only_wanted[j,1], "','", 
-                          gsub(",", ".", only_wanted[j,2]), "',", 
-                          only_wanted[j,3] - only_wanted[j-1,3], ",'",
-                          elektraren, "'),")
-    if ((i %% 70) == 0) {
-      df_postgres <- dbGetQuery(con, gsub(",$", ";", insert_query))
-      insert_query <- " INSERT INTO t_produkcia_import 
-                      (in_cas, in_vykon, praca, in_fve) VALUES "
-      insert_query <- paste0(insert_query, "('", only_wanted[1,1], "','", 
-                            gsub(",", ".", only_wanted[1,2]), "',", 
-                            0, ",'",
-                            elektraren, "'),")
-    }
+    insert_query <- paste0(insert_query, "('", only_wanted[j,1], "',", 
+    only_wanted[j,2], ",", only_wanted[j,2] - only_wanted[j-1,2], ",'",
+    elektraren, "'),")
+    # if ((i %% 80) == 0) {
+    #   df_postgres <- dbGetQuery(con, gsub(",$", ";", insert_query))
+    #   insert_query <- " INSERT INTO t_produkcia_import 
+    #                   (in_cas, in_praca, praca, in_fve) VALUES "
+    # }
   }
   #nahradit poslendnu ciarku bodkociarkou a poslat do databzy
   df_postgres <- dbGetQuery(con, gsub(",$", ";", insert_query))
