@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#install.packages(\"microbenchmark\")\nlibrary(microbenchmark)\nlibrary(compiler)\n\nact <- 3\npred <- c(3,2)\n\nprva <- function(x,y) {\n  compute_weigths_num(x, y)\n}\n\ndruha <- function(x,y) {\n  cmp_weigths_num(x, y)\n}\n\ncompare <- microbenchmark(prva(act,pred), druha(act,pred), times = 1000)\nlibrary(ggplot2)\nautoplot(compare)",
+    "created" : 1458906734878.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "16938399",
+    "id" : "A56E4A6D",
+    "lastKnownWriteTime" : 1458911120,
+    "last_content_update" : 1458911120506,
+    "path" : "~/GitHub/baka/R source/benchmarks/compare_scripit.R",
+    "project_path" : "compare_scripit.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
