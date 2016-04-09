@@ -1,14 +1,14 @@
 {
     "collab_server" : "",
-    "contents" : "#install.packages(\"microbenchmark\")\nlibrary(microbenchmark)\nlibrary(compiler)\n\nact <- 3\npred <- c(3,2)\n\nprva <- function(x,y) {\n  compute_weigths_num(x, y)\n}\n\ndruha <- function(x,y) {\n  cmp_weigths_num(x, y)\n}\n\ncompare <- microbenchmark(prva(act,pred), druha(act,pred), times = 1000)\nlibrary(ggplot2)\nautoplot(compare)",
+    "contents" : "install.packages(\"foreach\")\nlibrary(microbenchmark)\nlibrary(compiler)\nlibrary(ggplot2)\n\nact <- 3\npred <- c(3,2)\nz <- c(1:1000000)\n\nfff <- function(d) {\n  d <- 548 * 3655 / 9413 + 84205 * 88522 / 822\n}\n\nprva <- function(x) {\n  lapply(x, f)\n}\n\ndruha <- function(tr) {\n\n}\n\nz <- c(1:1000)\nsystem.time(lapply(z, fff))\ncl<-makeCluster(4,type=\"SOCK\")\nsystem.time(clusterApply(cl, z, fff))\nstopCluster(cl)\n\nsystem.time(prva(z))\nsystem.time(druha(z))\n\ncompare <- microbenchmark(lapply(z, fff), times = 1000)\ncl<-makeCluster(4,type=\"SOCK\")\ncompare2 <- microbenchmark(clusterApply(cl, z, fff), times = 1000)\nstopCluster(cl)\n\nautoplot(compare)\n\nlibrary(snow)\n\n# process in parallel\nlibrary(doParallel) \nlibrary(foreach)\ncl <- makeCluster(detectCores(), type='PSOCK')\nregisterDoParallel(cl)\n\n# turn parallel processing off and run sequentially again:\nregisterDoSEQ()\n",
     "created" : 1458906734878.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "16938399",
+    "hash" : "764793162",
     "id" : "A56E4A6D",
-    "lastKnownWriteTime" : 1458911120,
-    "last_content_update" : 1458911120506,
+    "lastKnownWriteTime" : 1459173813,
+    "last_content_update" : 1459173813121,
     "path" : "~/GitHub/baka/R source/benchmarks/compare_scripit.R",
     "project_path" : "compare_scripit.R",
     "properties" : {

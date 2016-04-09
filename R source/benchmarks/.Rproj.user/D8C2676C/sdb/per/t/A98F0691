@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "train_set <- data.frame(praca = as.numeric(c(1:10)), \n                       gho = as.numeric(c(1:10)),\n                       obl = as.numeric(c(1:10)))\nchosen_one <- data.frame(praca = 50, gho = 50, obl = 50)\nscale <- c(praca = 100, gho = 100, obl = 100)\ndiff <- c(1:10)\n\ntrain_set <- cbind(train_set, diff)\n\ntryy <- function(jebem) {\n  return(1 + 1 + 1)\n}\n\ntrain_set$diff <- apply(train_set, 1, function(x) tryy(train_set) )\n\n\ntry <- function(cho, tr, pod_prac, pod_gho, pod_obl, scale) {\n  ret <- (abs(cho[['praca']] - tr[['praca']]) * 100 / scale[['praca']])\n  +\n    (abs(cho[['gho']] - tr[['gho']]) * 100 / scale[['gho']]) \n  + \n    (abs(cho[['obl']] - tr[['obl']]) * 100 / scale[['obl']]) \n  return (ret)\n}\n\n\ntry2 <- function() {\n  ret <- (abs(chosen_one[['praca']] - train_set[['praca']]) * 100 / scale[['praca']])\n  +\n    (abs(chosen_one[['gho']] - train_set[['gho']]) * 100 / scale[['gho']]) \n  + \n    (abs(chosen_one[['obl']] - train_set[['obl']]) * 100 / scale[['obl']]) \n  return (ret)\n}\n\n\n",
+    "created" : 1459188986897.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "503254475",
+    "id" : "A98F0691",
+    "lastKnownWriteTime" : 1459194712,
+    "last_content_update" : 1459194712325,
+    "path" : "~/GitHub/baka/R source/benchmarks/try apply.R",
+    "project_path" : "try apply.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

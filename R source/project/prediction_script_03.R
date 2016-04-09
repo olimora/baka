@@ -23,9 +23,8 @@ source('~/GitHub/baka/R source/project/functions.R')
   e$elev <- TRUE
   e$dlzkadna <- TRUE
   e$den_hod <- c("den", "hod")[1]
-  e$fve <- c("FVE Dubravy 1", "FVE Dubravy 2", "FVE Plesivec")[3]
-  e.fve <- e$fve
-  e$tren_mnoz <- "najpodobnejsich 60"
+  e$fve <- c("FVE Dubravy 1", "FVE Dubravy 2", "FVE Plesivec")
+  e$tren_mnoz <- "najpodobnejsich %d"
   e$tren_mnoz_velkost <- 60
   e.tren_mnoz_velkost <- e$tren_mnoz_velkost
   e$tren_mnoz_select <- "select datum, sum(praca) praca, sum(gho) gho, sum(teplota) teplota, sum(vietor) vietor,
@@ -72,7 +71,7 @@ source('~/GitHub/baka/R source/project/functions.R')
   t.ordered <- 0
   t.actual <- 0
   
-  prog.printed <- -10
+  prog.printed <- -10000
   prog.print_perc <- 0
   prog.print_perc_all <- 0
   prog.baseAll <- 0
@@ -80,7 +79,7 @@ source('~/GitHub/baka/R source/project/functions.R')
   prog.i <- 0
   prog.actual_time <- 0
   prog.estimated_time <- 0
-  prog.diff <- 0
+  prog.diff <- 10
   
   scale.maxims <- 0
   scale.minims <- 0
@@ -91,13 +90,17 @@ source('~/GitHub/baka/R source/project/functions.R')
   
   db.drv <- 0
   db.result <- 0
-  
-  vzorka <- 100
-  
-}
 
-#na meranie casu
-time.start <- Sys.time()
+  diff_gho <- 90
+  diff_tep <- 10
+  diff_viet <- 1
+  diff_obl <- 0
+  diff_vlh <- 0
+  diff_dlz <- 10
+  diff_elev <- 0
+  
+    
+}
 
 db.drv <- dbDriver("PostgreSQL")
 if (exists("db.con")) dbDisconnect(db.con)
@@ -107,11 +110,21 @@ if (exists("db.con")) dbDisconnect(db.con)
 # prog.baseAll <- prog.baseAll$count
 # dbDisconnect(db.con)
 
+vzorka <- 100
 ntree_v <- c(100, 300, 500)
-mtry_v <- c(2:7)
+mtry_v <- c(4:6)
 tren_velk_v <- c(30, 60, 90, 120)
-
 prog.baseAll <- length(ntree_v) * length(mtry_v) * length(tren_velk_v) * vzorka
+
+e$fve <- e$fve[2]
+e.fve <- e$fve
+#e$tren_mnoz <- sprintf(e$tren_mnoz, )
+e$tren_mnoz_opis <- sprintf(e$tren_mnoz_opis, e.tren_mnoz_velkost, diff_gho, diff_tep, diff_viet, diff_obl, diff_vlh, diff_dlz, diff_elev)
+e$podobnost <- sprintf(e$podobnost, diff_gho, diff_tep, diff_viet, diff_obl, diff_vlh, diff_dlz, diff_elev)
+
+
+#na meranie casu
+time.start <- Sys.time()
 
 for (ntree_i in ntree_v) {
   e$forest_ntree <- ntree_i 
@@ -151,7 +164,7 @@ for (ntree_i in ntree_v) {
         
         t.all_days_count <- nrow(t.all_days)
         prog.basePart <- t.all_days_count
-        prog.printed <- -10
+        # prog.printed <- -10
         
         t.actual <- c()
         n.output <- c()
@@ -165,17 +178,23 @@ for (ntree_i in ntree_v) {
           t.not_i <- c(t.chosen_one[1,'datum'] != all_days_zaloha[,'datum'])
           t.train_set <- all_days_zaloha[t.not_i,] 
           
-          # vypocitat podobnost
+          # vypocitat rozdielnost
           t.differ <- c()
           for (j in 1:nrow(t.train_set)) { #nrow(t.train_set)
             t.differ[j] <- (
-              (abs(t.chosen_one['gho'] - t.train_set[j,'gho']) * 100 / scale.scale[1]) 
+              (abs(t.chosen_one['gho'] - t.train_set[j,'gho']) * 100 / scale.scale[1]) * diff_gho
               +
-                (abs(t.chosen_one['teplota'] - t.train_set[j,'teplota']) * 100 / scale.scale[2])
+                (abs(t.chosen_one['teplota'] - t.train_set[j,'teplota']) * 100 / scale.scale[2]) * diff_tep
               +
-                (abs(t.chosen_one['oblacnost'] - t.train_set[j,'oblacnost']) * 100 / scale.scale[4]) 
+                (abs(t.chosen_one['vietor'] - t.train_set[j,'vietor']) * 100 / scale.scale[3]) *diff_viet
+              # +
+              #   (abs(t.chosen_one['oblacnost'] - t.train_set[j,'oblacnost']) * 100 / scale.scale[4]) * diff_obl
+              # +
+              #   (abs(t.chosen_one['vlhkost'] - t.train_set[j,'vlhkost']) * 100 / scale.scale[5]) * diff_vlh
               +
-                (abs(t.chosen_one['dlzkadna'] - t.train_set[j,'dlzkadna']) * 100 / scale.scale[6])
+                (abs(t.chosen_one['dlzkadna'] - t.train_set[j,'dlzkadna']) * 100 / scale.scale[6]) * diff_dlz
+              # +
+              #   (abs(t.chosen_one['elev'] - t.train_set[j,'elev']) * 100 / scale.scale[7]) * diff_elev
             )
           }
           
@@ -197,7 +216,7 @@ for (ntree_i in ntree_v) {
           if (prog.print_perc_all >= prog.printed + prog.diff) {
             prog.actual_time <- as.numeric(difftime(Sys.time(), time.start, units = "sec"))
             prog.estimated_time <- prog.actual_time * 100 / prog.print_perc_all
-            print(sprintf("Forest: %03.2f%s all, p: %00000.d/%00000.d, Estimated time: %s, Actual: %s",
+            print(sprintf("Forest: %6.2f%s all, p: %4.d/%d, Estimated time: %s, Actual: %s",
                           prog.print_perc_all, "%", prog.i, prog.baseAll,
                           format.time(prog.estimated_time),
                           format.time(prog.actual_time)),
@@ -212,6 +231,7 @@ for (ntree_i in ntree_v) {
         f.stats <- all_statistics(t.actual, f.output)
         db.result <- dbGetQuery(db.con, build_insert_stats.forest(e, f.stats, time.start, fve))
         dbDisconnect(db.con)
+        print("insert")
       }
       
     }

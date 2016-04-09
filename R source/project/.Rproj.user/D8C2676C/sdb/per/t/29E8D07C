@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(insol)\nlibrary(RPostgreSQL)\n\n# nacitanie ovladaca, vytvorenie spojenia s databazou, \ndrv <- dbDriver(\"PostgreSQL\")\ncon <- dbConnect(drv, dbname = \"test_db\", host = \"localhost\", \n                 port = 5432, user = \"postgres\", password = \"password\")\n\n# pripravit tabulky\ndf_postgres <- dbGetQuery(con, \"SELECT pripravit_tabulky_zaklad();\");\n\n#naplnenie t_solar_hod\nlat <- 48.593646\nlong <- 19.374655\ntmz <- 0\n\nall_hours <- seq(ISOdate(2014,7,1,00), ISOdate(2015,11,1,00),by='hour')\nsun_pos <- sunpos(sunvector(JD(all_hours), lat, long, tmz))\nsun_pos <- cbind(sun_pos, elev = 90 - sun_pos[,'zenith'])\nsun_pos <- round(sun_pos, 6)\nsun_pos <- data.frame(sun_pos, time = as.character(all_hours))\n\ninsert_query <- \" INSERT INTO t_solar_hod (cas, azim, elev) VALUES \"\nfor (i in 1:nrow(sun_pos)) {\n  insert_query <- paste0(insert_query, \n                         sprintf(\"('%s', %f, %f),\",\n                                 sun_pos[i,'time'], \n                                 sun_pos[i,'azimuth'],\n                                 sun_pos[i,'elev']))\n}\ndf_postgres <- dbGetQuery(con, gsub(\",$\", \";\", insert_query))\n\n#naplnenie t_solar_den\nall_days <- seq(ISOdate(2014,7,1),ISOdate(2015,11,1),by='day')\nday_length <- daylength(lat, long, JD(all_days), tmz)[,3]\nto_insert <- data.frame(date = as.character(as.Date(all_days)), day_length)\n\ninsert_query <- \" INSERT INTO t_solar_den (datum, dlzkadna) VALUES \"\nfor (i in 1:nrow(to_insert)) {\n  insert_query <- paste0(insert_query, \n                         sprintf(\"('%s', %f),\",\n                                 to_insert[i,'date'],\n                                 to_insert[i,'day_length']))\n}\ndf_postgres <- dbGetQuery(con, gsub(\",$\", \";\", insert_query))\n\n# pripravit tabulky pre experimenty\ndf_postgres <- dbGetQuery(con, \"SELECT pripravit_tabulky_experimenty();\");\n\ndbDisconnect(con)\ndbUnloadDriver(drv)",
+    "created" : 1460208713752.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2939080272",
+    "id" : "29E8D07C",
+    "lastKnownWriteTime" : 1460220179,
+    "last_content_update" : 1460220179379,
+    "path" : "~/GitHub/baka/R source/project/db_prepare.R",
+    "project_path" : "db_prepare.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

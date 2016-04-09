@@ -1,7 +1,34 @@
-#install.packages("compiler")
 library(compiler)
 library(Metrics)
 library(sirad)
+
+
+compute_difference <- function(chosen_one, train_set, scal, inn, pod) {
+  ret <- ( 
+    ifelse(inn$gho, (abs(chosen_one[['gho']] - train_set[['gho']]) * 100 / scal[['gho']]) * pod$gho, 0)
+    +
+      ifelse(inn$obl, (abs(chosen_one[['oblacnost']] - train_set[['oblacnost']]) * 100 / scal[['oblacnost']]) * pod$obl, 0)
+    +
+      ifelse(inn$tep, (abs(chosen_one[['teplota']] - train_set[['teplota']]) * 100 / scal[['teplota']]) * pod$tep, 0)
+    +
+      ifelse(inn$vie, (abs(chosen_one[['vietor']] - train_set[['vietor']]) * 100 / scal[['vietor']]) * pod$vie, 0)
+    + 
+      ifelse(inn$vlh, (abs(chosen_one[['vlhkost']] - train_set[['vlhkost']]) * 100 / scal[['vlhkost']]) * pod$vlh, 0)
+    +
+      ifelse(inn$tla, (abs(chosen_one[['tlak']] - train_set[['tlak']]) * 100 / scal[['tlak']]) * pod$tla, 0)
+    +
+      ifelse(inn$dlz, (abs(chosen_one[['dlzkadna']] - train_set[['dlzkadna']]) * 100 / scal[['dlzkadna']]) * pod$dlz, 0)
+    +
+      ifelse(inn$azi, (abs(chosen_one[['azim']] - train_set[['azim']]) * 100 / scal[['azim']]) * pod$azi, 0)
+    +
+      ifelse(inn$ele, (abs(chosen_one[['elev']] - train_set[['elev']]) * 100 / scal[['elev']]) * pod$ele, 0)
+  ) 
+}
+compute_difference <- cmpfun(compute_difference)
+
+# spajanie stringov
+`%s%` <- function(s1, s2) paste0(s1, s2)
+`%s%` <- cmpfun(`%s%`)
 
 #to compute numbers of weights
 compute_weigths_num <- function(input, layers) {
@@ -16,47 +43,31 @@ compute_weigths_num <- function(input, layers) {
 }
 compute_weigths_num <- cmpfun(compute_weigths_num)
 
-#build insert neur stats
-build_insert_stats.neur <- function(e, stats.neur, time, fve) {
-  ret <- sprintf("INSERT INTO t_experiment (cas_behu, in_gho, in_teplota, in_vietor, in_oblacnost,
-                 in_vlhkost, in_tlak, in_azim, in_zen, in_elev, in_dlzkadna, den_hod, fve, 
-                 tren_mnoz, tren_mnoz_velkost, tren_mnoz_select, tren_mnoz_opis, podobnost, 
-                 neural, neural_layers, neural_threshold, neural_algorithm, neural_startweights,
-                 N, MBE, RMBE, RMSE, RRMSE, MAE, RMAE, MPE, MAXAE, SD)
-                 VALUES ('%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', '%s', 
-                 '%s', %d, '%s', '%s', '%s', %s, '%s', %f, '%s', '%s',
-                 %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
-                 time, e$gho, e$teplota, e$vietor, e$oblacnost, e$vlhkost, e$tlak,
-                 e$azim, e$zen, e$elev, e$dlzkadna, e$den_hod, e$fve[fve],
-                 e$tren_mnoz, e$tren_mnoz_velkost, gsub("'", '"', e$tren_mnoz_select), e$tren_mnoz_opis, e$podobnost,
-                 e$neural, e$neural_layers, e$neural_threshold, e$neural_algorithm, 
-                 as.character(e$neural_startweights),
-                 stats.neur$N, stats.neur$MBE, stats.neur$RMBE, stats.neur$RMSE, stats.neur$RRMSE,
-                 stats.neur$MAE, stats.neur$RMAE, stats.neur$MPE, stats.neur$MAXAE, stats.neur$SD)
-  fve <- fve
+#build insert stats
+build_insert_stats <- function(e, stats, ttime, fve) {
+  for (name in names(stats)) {
+    if (is.infinite(stats[[name]]) | !is.numeric(stats[[name]]) | is.nan(stats[[name]])) stats[[name]] <- 999.999
+  }
+  ret <- sprintf("INSERT INTO t_experiment (cas_behu, metoda, param1, param2, param3, param4, param5,
+                 N, MBE, RMBE, RMSE, RRMSE, MAE, RMAE, MPE, MAXAE, SD,
+                 tm_velkost, tm_opis, tm_select, fve, den_hod,
+                 pod_gho, pod_oblacnost, pod_teplota, pod_vietor, pod_vlhkost, pod_tlak, pod_dlzkadna, pod_azim, pod_elev,
+                 in_gho, in_oblacnost, in_teplota, in_vietor, in_vlhkost, in_tlak, in_dlzkadna, in_azim, in_elev)
+                 VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s',
+                 %d, %f, %f, %f, %f, %f, %f, %f, %f, %f,
+                 %d, '%s', '%s', '%s', '%s',
+                 %f, %f, %f, %f, %f, %f, %f, %f, %f,
+                 %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+                 ttime, e$metoda, e$param1, e$param2, e$param3, e$param4, e$param5,
+                 stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
+                 e$tm_velkost, e$tm_opis, e$tm_select, e$fve[fve], e$den_hod,
+                 e$pod_gho, e$pod_obl, e$pod_tep, e$pod_vie, e$pod_vlh, e$pod_tla, e$pod_dlz, e$pod_azi, e$pod_ele,
+                 e$in_gho, e$in_obl, e$in_tep, e$in_vie, e$in_vlh, e$in_tla, e$in_dlz, e$in_azi, e$in_ele)
   return(ret)
 }
-build_insert_stats.neur <- cmpfun(build_insert_stats.neur)
+build_insert_stats <- cmpfun(build_insert_stats)
 
-build_insert_stats.forest <- function(e, stats.forest, time, fve) {
-  ret <- sprintf("INSERT INTO t_experiment (cas_behu, in_gho, in_teplota, in_vietor, in_oblacnost,
-                 in_vlhkost, in_tlak, in_azim, in_zen, in_elev, in_dlzkadna, den_hod, fve, 
-                 tren_mnoz, tren_mnoz_velkost, tren_mnoz_select, tren_mnoz_opis, podobnost,
-                 forest, forest_ntree, forest_mtry,
-                 N, MBE, RMBE, RMSE, RRMSE, MAE, RMAE, MPE, MAXAE, SD)
-                 VALUES ('%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', '%s', 
-                 '%s', %d, '%s', '%s', '%s', %s, %d, %d,
-                 %d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
-                 time, e$gho, e$teplota, e$vietor, e$oblacnost, e$vlhkost, e$tlak,
-                 e$azim, e$zen, e$elev, e$dlzkadna, e$den_hod, e$fve[fve],
-                 e$tren_mnoz, e$tren_mnoz_velkost, gsub("'", '"', e$tren_mnoz_select), e$tren_mnoz_opis, e$podobnost,
-                 e$forest, e$forest_mtry, e$forest_ntree, 
-                 stats.forest$N, stats.forest$MBE, stats.forest$RMBE, stats.forest$RMSE, stats.forest$RRMSE,
-                 stats.forest$MAE, stats.forest$RMAE, stats.forest$MPE, stats.forest$MAXAE, stats.forest$SD)
-  fve <- fve
-  return(ret)
-}
-build_insert_stats.forest <- cmpfun(build_insert_stats.forest)
+
 
 # format casu
 format.time <- function(x) UseMethod("format.time")
