@@ -152,11 +152,11 @@ Leto vs. zima
 
 ========================================================
 left: 50%
-výroba
+Výroba
 
 ![plot of chunk unnamed-chunk-5](presentation-figure/unnamed-chunk-5-1.png)
 ***
-chybovosť
+Chybovosť
 
 ![plot of chunk unnamed-chunk-6](presentation-figure/unnamed-chunk-6-1.png)
 

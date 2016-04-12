@@ -165,7 +165,7 @@ Leto vs. zima
 
 ========================================================
 left: 50%
-výroba
+Výroba
 
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie vyrobene
@@ -179,7 +179,7 @@ ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
  scale_fill_brewer(palette = "Set1")
 ```
 ***
-chybovosť
+Chybovosť
 
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie metrika chyba
