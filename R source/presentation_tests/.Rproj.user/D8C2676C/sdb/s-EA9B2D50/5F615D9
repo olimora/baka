@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "cc <- dbGetQuery(db.con, \"select count(*) as cc from (select distinct * from (select cas, fve from v_data) s1) s2\")$cc\nperc <- cc * 100 / cc_all\nsumm <- dbGetQuery(db.con, \"select sum(praca) cc from v_data;\")$cc\nperc_summ <- summ * 100 / sum_all\n\n\ncc_120 <- dbGetQuery(db.con, \"select count(*) as cc from (select distinct * from (select cas, fve from v_data_120) s1) s2\")$cc\nperc_120 <- cc_120 * 100 / cc_all\nsum_120 <- dbGetQuery(db.con, \"select sum(praca) cc from v_data_120;\")$cc\nperc_sum_120 <- sum_120 * 100 / sum_all\n\n\ncc_all <- dbGetQuery(db.con, \"select count(*) as cc from (select distinct * from (select cas, fve from v_data_all) s1) s2\")$cc\nsum_all <- dbGetQuery(db.con, \"select sum(praca) cc from v_data_all;\")$cc\n\nprint(paste(cc, perc, summ, perc_summ))\nprint(paste(cc_120, perc_120, sum_120, perc_sum_120))\nprint(paste(cc_all, sum_all))",
+    "created" : 1460479723266.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "370664042",
+    "id" : "5F615D9",
+    "lastKnownWriteTime" : 3419473789575321445,
+    "last_content_update" : 1460480769002,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -20,11 +20,11 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
   f.ntree <- c(1000, 700, 500, 300, 100) [2]
   f.mtry <- c(2)
   
-  pod_gho <- c(240, 220, 200, 0)[2]
-  pod_obl <- c(90, 80, 70, 0)[2]
-  pod_tep <- c(35, 30, 25, 0)[2]
-  pod_vie <- c(6, 5, 4, 0)[2]
-  pod_dlz <- c(55, 50, 45, 0)[2]
+  pod_gho <- 90 #c(240, 220, 200, 0)[2]
+  pod_obl <- 0 # c(90, 80, 70, 0)[2]
+  pod_tep <- 10 #c(35, 30, 25, 0)[2]
+  pod_vie <- 1 #c(6, 5, 4, 0)[2]
+  pod_dlz <- 0 #c(55, 50, 45, 0)[2]
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -178,3 +178,13 @@ if (exists("db.con")) dbDisconnect(db.con)
 dbUnloadDriver(db.drv)
 
 stopCluster(cl)
+
+db.drv <- dbDriver("PostgreSQL")
+if (exists("db.con")) dbDisconnect(db.con)
+db.con <- getConnection(db.drv)
+to_see <-  dbGetQuery(db.con, "SELECT fve, datum, sum(gho) gho, sum(oblacnost) oblacnost, 
+sum(teplota + 100) teplota, sum(vietor) vietor, max(dlzkadna) dlzkadna, sum(praca) praca
+FROM v_data GROUP BY fve, datum ORDER BY fve, datum")
+to_see <- cbind(to_see, output)
+to_see <- cbind(to_see, dif = abs(output - actual) * 100 / actual)
+to_see <- arrange(to_see, to_see$dif)

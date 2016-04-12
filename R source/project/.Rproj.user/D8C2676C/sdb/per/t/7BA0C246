@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# script na naplnanie databazy\n#vymaze vsetko okrem funkcii\nrm(list = setdiff(ls(), lsf.str()))\n#na meranie casu\nstart_time_all <- Sys.time()\n# nainstalovanie baliku - potrebne len raz\n#install.packages(\"RPostgreSQL\")\nlibrary(\"RPostgreSQL\")\n\n# nacitanie ovladaca, vytvorenie spojenia s databazou, \ndrv <- dbDriver(\"PostgreSQL\")\ncon <- dbConnect(drv, dbname = \"test_db\", host = \"localhost\", \n                 port = 5432, user = \"postgres\", password = \"password\")\n\n# pripravit tabulky\nstart_time <- Sys.time()\ndf_postgres <- dbGetQuery(con, \" SELECT pripravit_tabulky_data();\");\nend_time <- Sys.time()\nprint(\"con a pripravit tabulky\")\nprint(difftime(end_time, start_time, units=\"sec\"))\n\n# naplnenie databazy predpovedami modelu Aladin\nstart_time <- Sys.time()\npath <- 'C:/000/skola/baka/data/Aladin/gho'\nfiles <- list.files(path, recursive = T, full.names = T)\nfor(i in 1:length(files)) {\n  # df_postgres <- dbGetQuery(con, paste0(\" SELECT import_aladin_csv('\", files[i], \"');\"))\n  df_postgres <- dbGetQuery(con, sprintf(\" SELECT import_aladin_csv('%s');\", files[i]))\n}\nend_time <- Sys.time()\nprint(\"import aladin\")\nprint(difftime(end_time, start_time, units=\"sec\"))\n\nstart_time <- Sys.time()\npath <- 'C:/000/skola/baka/data/fve'\nfiles <- list.files(path, recursive = T, full.names = T)\nfor(i in 1:length(files)) {\n  content_of_file <- read.csv2(files[i], row.names=NULL)\n  # vybranie iba riadkov s datami a stlpcov Cas, vykon a praca\n  to_insert <- content_of_file[c(3:nrow(content_of_file)),c(1,9)]\n  to_insert[,2] <- as.numeric(as.character(to_insert[,2]))\n  colnames(to_insert) <- c('time', 'work')\n  # vytiahnutie elektrarne\n  elektraren <- sub(\"/Ktab.*\", \"\", sub(\".*fve/\", \"\", files[i]))\n  # vyskladanie insertu\n  insert_query <- \" INSERT INTO t_produkcia_import \n  (in_cas, in_praca, in_fve) VALUES \"\n  prev_work <- to_insert[1,'work']\n  for(j in 1:nrow(to_insert)) {\n    insert_query <- paste0(insert_query,\n                           sprintf(\"('%s', %d, '%s'),\",\n                                   to_insert[j, 'time'],\n                                   to_insert[j, 'work'] - prev_work,\n                                   elektraren))\n    prev_work <- to_insert[j,'work']\n  }\n  df_postgres <- dbGetQuery(con, gsub(\",$\", \";\", insert_query))\n}\ndf_postgres <- dbGetQuery(con, \" SELECT import_fve_csv();\")\n\nend_time <- Sys.time()\nprint(\"import fve\")\nprint(difftime(end_time, start_time, units=\"sec\"))\n\n# vymazanie nepotrebnych a chybnych dat\nstart_time <- Sys.time()\ndf_postgres <- dbGetQuery(con, \" SELECT delete_abundant_data();\")\nend_time <- Sys.time()\nprint(\"delete data\")\nprint(difftime(end_time, start_time, units=\"sec\"))\n\nend_time_all <- Sys.time()\nprint(\"all\")\nprint(difftime(end_time_all, start_time_all, units=\"sec\"))\nprint(difftime(end_time_all, start_time_all, units=\"mins\"))\n\ndbDisconnect(con)\ndbUnloadDriver(drv)\nrm(list = setdiff(ls(), lsf.str()))",
+    "created" : 1460464340749.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3443922348",
+    "id" : "7BA0C246",
+    "lastKnownWriteTime" : 1460207882,
+    "last_content_update" : 1460207882,
+    "path" : "~/GitHub/baka/R source/project/db_insert_data.R",
+    "project_path" : "db_insert_data.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

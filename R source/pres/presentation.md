@@ -27,7 +27,7 @@ Prehľad
 
 Dáta
 ========================================================
-- formát csv
+- 24 hodín dopredu
 - Aladin
   - dátum a čas v UTC, hodinové kroky
   - teplota
@@ -124,9 +124,7 @@ Výber trénovacej množiny
   - teplota: 10
   - vietor: 1
   
-***
-- po dňoch:
-- po hodinách:
+<!-- - po hodinách: -->
 
 Výsledky
 ========================================================
@@ -144,8 +142,8 @@ left: 60%
 
 Leto vs. zima
 ========================================================
-- leto = 21. marec až 23. september
-- zima = 24. september až 20. marec
+- leto = 21. marec až 23. september = 636 dní
+- zima = 24. september až 20. marec = 513 dní
 - 2.4 x viac vyrobenej energie v lete
 - 2.34 x menšia RRMSE v lete
 - 2.44 x menšia RMAE v lete
@@ -153,12 +151,45 @@ Leto vs. zima
 ========================================================
 left: 50%
 Výroba
-
 ![plot of chunk unnamed-chunk-5](presentation-figure/unnamed-chunk-5-1.png)
 ***
-Chybovosť
-
+Chyba predikcie
 ![plot of chunk unnamed-chunk-6](presentation-figure/unnamed-chunk-6-1.png)
+
+========================================================
+- malé hodnoty žiarenia
+- nulové alebo minimálne hodnoty vyprodukovanej energie - zanedbateľné
+- slnečný svit => žiarenie > 120 W/m2
+- prvá a posledná hodina dňa = východ/západ slnka
+
+
+dáta   | počet hodín | % hodín | % sum(energia)
+-------|-------------|---------|---------------
+všetky |      14 117 |  100.00 |    100.00
+> 120  |       9 421 |   66.74 |     93.34
+p. a p.|       7 265 |   51.46 |     83.65
+
+========================================================
+predikcia po dňoch:
+![plot of chunk unnamed-chunk-7](presentation-figure/unnamed-chunk-7-1.png)
+
+***
+po hodinách:
+![plot of chunk unnamed-chunk-8](presentation-figure/unnamed-chunk-8-1.png)
+
+
+========================================================
+left:
+
+podobnosť:
+- žiarenie: 220    
+- oblačnosť: 80      
+- teplota: 30      
+- vietor: 5     
+- dĺžka dňa: 50   
+
+***
+![plot of chunk unnamed-chunk-9](presentation-figure/unnamed-chunk-9-1.png)
 
 
 Zrýchlenie výpočtov v R
@@ -182,7 +213,7 @@ stopCluster(cl)
 
 ========================================================
 
-![plot of chunk unnamed-chunk-8](presentation-figure/unnamed-chunk-8-1.png)
+![plot of chunk unnamed-chunk-11](presentation-figure/unnamed-chunk-11-1.png)
 ***
 - a = prvotný kód
 - b = alokácia pamäti, vektorizované výpočty, matica namiesto tabuľky
@@ -191,4 +222,15 @@ stopCluster(cl)
 Intel(R) Core(TM) i5-2450M CPU @ 2.50GHz
 
 2 jadrá - 4 thready
+
+Pokračovanie
+========================================================
+- vyskúšať iné predikčné metódy (neurónová sieť, quantile random forest, support vector machine)
+  - potreba procesorového času
+  - malý potenciál pre zlepšenie
+- postprocessing - štatistické spracovanie predpovedí
+  - veľký potenciál pre zlepšenie
+  - veľká náročnosť 
+  - potreba človekohodín 
+
 

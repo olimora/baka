@@ -27,7 +27,7 @@ Prehľad
 
 Dáta
 ========================================================
-- formát csv
+- 24 hodín dopredu
 - Aladin
   - dátum a čas v UTC, hodinové kroky
   - teplota
@@ -64,7 +64,6 @@ sun_pos <- cbind(sun_pos,
                  elev = 90 - sun_pos[,'zenith'])
 sun_pos <- data.frame(sun_pos, 
                   time = as.character(all_hours))
-
 ```
 
 Metriky presnosti
@@ -123,9 +122,7 @@ Výber trénovacej množiny
   - teplota: 10
   - vietor: 1
   
-***
-- po dňoch:
-- po hodinách:
+<!-- - po hodinách: -->
 
 Výsledky
 ========================================================
@@ -157,8 +154,8 @@ ggplot(vys, aes(nastavenia, chyba, fill = metrika)) +
 
 Leto vs. zima
 ========================================================
-- leto = 21. marec až 23. september
-- zima = 24. september až 20. marec
+- leto = 21. marec až 23. september = 636 dní
+- zima = 24. september až 20. marec = 513 dní
 - 2.4 x viac vyrobenej energie v lete
 - 2.34 x menšia RRMSE v lete
 - 2.44 x menšia RMAE v lete
@@ -166,7 +163,6 @@ Leto vs. zima
 ========================================================
 left: 50%
 Výroba
-
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie vyrobene
  1 zima 683.63
@@ -179,8 +175,7 @@ ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
  scale_fill_brewer(palette = "Set1")
 ```
 ***
-Chybovosť
-
+Chyba predikcie
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie metrika chyba
  1 zima rrmse 45.7
@@ -194,6 +189,86 @@ ggplot(df, aes(obdobie, chyba, fill = metrika)) +
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
   geom_text(aes(label = chyba, y = chyba), size = 9)
+```
+
+========================================================
+- malé hodnoty žiarenia
+- nulové alebo minimálne hodnoty vyprodukovanej energie - zanedbateľné
+- slnečný svit => žiarenie > 120 W/m2
+- prvá a posledná hodina dňa = východ/západ slnka
+
+
+dáta   | počet hodín | % hodín | % sum(energia)
+-------|-------------|---------|---------------
+všetky |      14 117 |  100.00 |    100.00
+> 120  |       9 421 |   66.74 |     93.34
+p. a p.|       7 265 |   51.46 |     83.65
+
+========================================================
+predikcia po dňoch:
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='data metrika chyba
+ 1 all rrmse 25.32
+ 2 all rmae  18.92
+ 3 svit rrmse 23.91
+ 4 svit rmae  18.08
+ 5 pp  rrmse 23.47
+ 6 pp  rmae  17.44')
+df$data <- factor(df$data, levels = c("all", "svit", "pp"))
+df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
+library(ggplot2)
+ggplot(df, aes(data, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = F) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), size = 9)
+```
+
+***
+po hodinách:
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='data metrika chyba
+ 1 all rrmse 19.22
+ 2 all rmae  14.3
+ 3 svit rrmse 18.4
+ 4 svit rmae  13.72
+ 5 pp  rrmse 17.79
+ 6 pp  rmae  13.11')
+df$data <- factor(df$data, levels = c("all", "svit", "pp"))
+df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
+library(ggplot2)
+ggplot(df, aes(data, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = F) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), size = 12)
+```
+
+
+========================================================
+left:
+
+podobnosť:
+- žiarenie: 220    
+- oblačnosť: 80      
+- teplota: 30      
+- vietor: 5     
+- dĺžka dňa: 50   
+
+***
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='data metrika chyba
+ 1 all rrmse 19.22
+ 2 all rmae  14.3
+ 3 svit rrmse 18.4
+ 4 svit rmae  13.72
+ 5 pp  rrmse 17.79
+ 6 pp  rmae  13.11')
+df$data <- factor(df$data, levels = c("all", "svit", "pp"))
+df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
+library(ggplot2)
+ggplot(df, aes(data, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = F) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), size = 12)
 ```
 
 
@@ -236,4 +311,15 @@ ggplot(casy, aes(sposob, sekundy, fill = velkost)) +
 Intel(R) Core(TM) i5-2450M CPU @ 2.50GHz
 
 2 jadrá - 4 thready
+
+Pokračovanie
+========================================================
+- vyskúšať iné predikčné metódy (neurónová sieť, quantile random forest, support vector machine)
+  - potreba procesorového času
+  - malý potenciál pre zlepšenie
+- postprocessing - štatistické spracovanie predpovedí
+  - veľký potenciál pre zlepšenie
+  - veľká náročnosť 
+  - potreba človekohodín 
+
 
