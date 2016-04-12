@@ -20,13 +20,13 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
   f.ntree <- c(1000, 700, 500, 300, 100) [3]
   f.mtry <- c(2)
   
-  pod_gho <- 90 #c(240, 220, 200, 0)[2]
-  pod_obl <- 0 #c(90, 80, 70, 0)[2]
-  pod_tep <- 10 #c(35, 30, 25, 0)[2]
+  pod_gho <- 1 #90 #c(240, 220, 200, 0)[2]
+  pod_obl <- 1 #c(90, 80, 70, 0)[2]
+  pod_tep <- 1 #c(35, 30, 25, 0)[2]
   pod_vie <- 1 #c(6, 5, 4, 0)[2]
-  pod_vlh <- 0 #c(0)
-  pod_dlz <- 0 #c(55, 50, 45, 0)[2]
-  pod_ele <- 0 #c(0)
+  pod_vlh <- 1 #c(0)
+  pod_dlz <- 1 #c(55, 50, 45, 0)[2]
+  pod_ele <- 1 #c(0)
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -44,7 +44,7 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 
 {
   #pocet vsetkyc dni - pocitam percenta
-  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data_120) s1) s2")
+  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data) s1) s2")
   prog.baseAll <- prog.baseAll$ccc
   prog.opsAll <- length(tm.velkost) * length(f.ntree) * length(f.mtry) * 
     length(pod_gho) * length(pod_obl) * length(pod_tep) * length(pod_vie) * 
@@ -60,7 +60,7 @@ time.start <- Sys.time()
 
 select <- " SELECT datum, cas, praca, gho, oblacnost, 
 teplota, vietor, vlhkost, dlzkadna, elev
-FROM v_data_120 WHERE fve = %d ORDER BY cas"
+FROM v_data WHERE fve = %d ORDER BY cas"
 
 hours_done <- 0
 ops_done <- 0
@@ -87,8 +87,8 @@ for (i.fve in fve) {
   all_hours <- dbGetQuery(db.con, sprintf(select, i.fve))
   
   ad_ncol <- ncol(all_hours)
-  maxims <- sapply(all_hours[,4:ad_ncol], max)
-  minims <- sapply(all_hours[,4:ad_ncol], min)
+  maxims <- apply(all_hours[,4:ad_ncol], 2, max)
+  minims <- apply(all_hours[,4:ad_ncol], 2, min)
   scale <- abs(maxims - minims)
   all_hours <- data.matrix(all_hours)
   
@@ -102,7 +102,7 @@ for (i.fve in fve) {
                          "i.ntree", "i.mtry", "i.velkost"))
   fve_output <- parSapply(cl, 1:nrow(chosen_hours), function(y) {
     hourh <- chosen_hours[y,]
-    potencial <- all_hours[all_hours[,'cas'] != hourh[['cas']],]
+    potencial <- all_hours[all_hours[,'datum'] != hourh[['datum']],]
     diff <- vector(mode = "numeric", length = nrow(potencial))
     
     diff <- sapply(1:length(diff), function(x) {
@@ -124,7 +124,7 @@ for (i.fve in fve) {
                                         teplota = hourh[['teplota']], vietor = hourh[['vietor']],
                                         vlhkost = hourh[['vlhkost']], dlzkadna = hourh[['dlzkadna']],
                                         elev = hourh[['elev']]), type="response", norm.votes=TRUE)
-    # varImpPlot(forest)
+    #varImpPlot(forest)
     
     return(predic)
   })
@@ -194,7 +194,7 @@ print(sprintf("Start: %s, End: %s, Duration: %s",
 db.con <- getConnection(db.drv)
 all_data <-  dbGetQuery(db.con, "SELECT fve, datum, cas, gho, oblacnost,
                       teplota, vietor, vlhkost, dlzkadna, elev, praca
-                      FROM v_data_120 ORDER BY fve, cas")
+                      FROM v_data ORDER BY fve, cas")
 all_data <- cbind(all_data, output)
 to_see <- cbind(all_data, dif = abs(output - actual) * 100 / actual)
 to_see <- arrange(to_see, to_see$dif)

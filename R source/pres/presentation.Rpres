@@ -69,7 +69,6 @@ sun_pos <- data.frame(sun_pos,
 Metriky presnosti
 ========================================================
 - hodnoty nameranej vyprodukovanej energie sú sčítané za celý deň
-- odmocnená stredná kvadratická chyba
 - predpovedaná hodnota - $y_{i,p}$, skutočná hodnota - $y_{i,s}$ 
 - odmocnená stredná kvadratická chyba
 $$RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_{i,p} - y_{i,s})^n}$$
@@ -140,11 +139,11 @@ library(ggplot2)
 ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 9)
+  geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 ***
-- červená = RMAE
-- modrá = RRMSE
+- červená = RRMSE
+- modrá = RMAE
 
 - predch. 30 dní
 - žiarenie * 1 
@@ -171,7 +170,7 @@ df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
 library(ggplot2)
 ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
   geom_bar(stat="identity") + 
- geom_text(aes(label = vyrobene, y = vyrobene), size = 9) + 
+ geom_text(aes(label = vyrobene, y = vyrobene), size = 15) + 
  scale_fill_brewer(palette = "Set1")
 ```
 ***
@@ -188,7 +187,7 @@ library(ggplot2)
 ggplot(df, aes(obdobie, chyba, fill = metrika)) + 
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 9)
+  geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 
 ========================================================
@@ -220,26 +219,26 @@ library(ggplot2)
 ggplot(df, aes(data, chyba, fill = metrika)) + 
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 9)
+  geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 
 ***
 po hodinách:
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='data metrika chyba
- 1 all rrmse 19.22
- 2 all rmae  14.3
- 3 svit rrmse 18.4
- 4 svit rmae  13.72
- 5 pp  rrmse 17.79
- 6 pp  rmae  13.11')
+ 1 all rrmse 22.65
+ 2 all rmae  17.41
+ 3 svit rrmse 21.27
+ 4 svit rmae  16.27
+ 5 pp  rrmse 20.3
+ 6 pp  rmae  15.2')
 df$data <- factor(df$data, levels = c("all", "svit", "pp"))
 df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
 library(ggplot2)
 ggplot(df, aes(data, chyba, fill = metrika)) + 
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 12)
+  geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 
 
@@ -268,7 +267,7 @@ library(ggplot2)
 ggplot(df, aes(data, chyba, fill = metrika)) + 
  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
  scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 12)
+  geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 
 

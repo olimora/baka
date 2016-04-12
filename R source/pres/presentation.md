@@ -70,7 +70,6 @@ sun_pos <- data.frame(sun_pos,
 Metriky presnosti
 ========================================================
 - hodnoty nameranej vyprodukovanej energie sú sčítané za celý deň
-- odmocnená stredná kvadratická chyba
 - predpovedaná hodnota - $y_{i,p}$, skutočná hodnota - $y_{i,s}$ 
 - odmocnená stredná kvadratická chyba
 $$RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_{i,p} - y_{i,s})^n}$$
@@ -131,8 +130,8 @@ Výsledky
 left: 60%
 ![plot of chunk unnamed-chunk-4](presentation-figure/unnamed-chunk-4-1.png)
 ***
-- červená = RMAE
-- modrá = RRMSE
+- červená = RRMSE
+- modrá = RMAE
 
 - predch. 30 dní
 - žiarenie * 1 
