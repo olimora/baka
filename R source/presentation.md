@@ -136,9 +136,25 @@ left: 60%
 `+` teplota * 10   
 `+` vietor * 1
 
+Zrýchlenie výpočtov v R
+========================================================
+- alokácia pamäti
+- vektorizácia (namiesto cyklov)
+- matica namiesto data.frame
+- paralelizmus
+
+
+
+```r
+library(snow)
+cl <- makeCluster(4, type='SOCK')
+clusterEvalQ(cl, myFun <- function(x) UseMethod("myFun"))
+clusterEvalQ(cl, { library(plyr); library(randomForest) })
+clusterExport(cl, list("var1", "var2"))
+output <- parSapply(cl, vec, function(x) {return(vec + var1 + var2)})
+stopCluster(cl)
+```
+
 ========================================================
 
-
-
-
-
+![plot of chunk unnamed-chunk-6](presentation-figure/unnamed-chunk-6-1.png)

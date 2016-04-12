@@ -53,7 +53,8 @@ Dáta
   - elevácia (výška Slnka na oblohe)
   - dĺžka dňa (počet hodín, kedy je Slnko nad horizontom)
 
-```{r eval=FALSE}
+
+```r
 library(insol)
 library(RPostgreSQL)
 all_hours <- seq(ISOdate(2014,7,1,00), 
@@ -64,12 +65,13 @@ sun_pos <- cbind(sun_pos,
                  elev = 90 - sun_pos[,'zenith'])
 sun_pos <- data.frame(sun_pos, 
                   time = as.character(all_hours))
-
 ```
 
 Metriky presnosti
 ========================================================
 - hodnoty nameranej vyprodukovanej energie sú sčítané za celý deň
+- odmocnená stredná kvadratická chyba
+- predpovedaná hodnota - $y_{i,p}$, skutočná hodnota - $y_{i,s}$ 
 - odmocnená stredná kvadratická chyba
 $$RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_{i,p} - y_{i,s})^n}$$
 - priemerná absolútna chyba
@@ -79,7 +81,8 @@ $$MAE=\frac{1}{N}\sum_{i=1}^{N}|y_{i,p} - y_{i,s}|$$
 - normalizované (%)
 $$RRMSE=RMSE*\frac{100}{\frac{1}{N}\sum_{i=1}^{N}y_{i,s}}$$
 <br><br>
-```{r, eval=FALSE}
+
+```r
 library(sirad)
 statistics <- modeval(predicted, actual, stat=c("RMSE","RRMSE","MAE","RMAE"))
 ```
@@ -92,12 +95,12 @@ Random forest
 - výber prediktorov do podmnožín má normálne rozdelenie
 - výstup je najpočetnejší hlas (klasifikácia), resp. priemer hlasov (regresia) 
 
-```{r, eval=FALSE}
+
+```r
 library(randomForest)
 forest <- randomForest(data=train_set,
   formula=praca~gho+oblacnost+teplota+dlzkadna)
 output <- predict(forest, test_set, type="response", norm.votes=TRUE)
-
 ```
 
 Nastavenia modelu
@@ -120,24 +123,15 @@ Výber trénovacej množiny
   - globálne žiarenie: 90
   - teplota: 10
   - vietor: 1
+  
+***
+- po dňoch:
+- po hodinách:
 
 Výsledky
 ========================================================
 left: 60%
-```{r, echo=FALSE}
-vys  <- read.table(header = T, text='nastavenia metrika chyba
- 1 a rrmse 29.3858
- 2 a rmae  23.2617
- 3 b rrmse 25.1673
- 4 b rmae  19.1493
- 5 c rrmse 24.8781
- 6 c rmae  18.8399')
-library(ggplot2)
-ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
- geom_bar(stat="identity", position = "dodge", show.legend = F) + 
- scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 9)
-```
+![plot of chunk unnamed-chunk-4](presentation-figure/unnamed-chunk-4-1.png)
 ***
 - červená = RMAE
 - modrá = RRMSE
@@ -148,6 +142,25 @@ ggplot(vys, aes(nastavenia, chyba, fill = metrika)) +
 `+` teplota * 10   
 `+` vietor * 1
 
+Leto vs. zima
+========================================================
+- leto = 21. marec až 23. september
+- zima = 24. september až 20. marec
+- 2.4 x viac vyrobenej energie v lete
+- 2.34 x menšia RRMSE v lete
+- 2.44 x menšia RMAE v lete
+
+========================================================
+left: 50%
+výroba
+
+![plot of chunk unnamed-chunk-5](presentation-figure/unnamed-chunk-5-1.png)
+***
+chybovosť
+
+![plot of chunk unnamed-chunk-6](presentation-figure/unnamed-chunk-6-1.png)
+
+
 Zrýchlenie výpočtov v R
 ========================================================
 - alokácia pamäti
@@ -156,7 +169,8 @@ Zrýchlenie výpočtov v R
 - paralelizmus
 
 
-```{r, eval=FALSE}
+
+```r
 library(snow)
 cl <- makeCluster(4, type='SOCK')
 clusterEvalQ(cl, myFun <- function(x) UseMethod("myFun"))
@@ -168,17 +182,13 @@ stopCluster(cl)
 
 ========================================================
 
-```{r, echo=FALSE}
-vys  <- read.table(header = T, text='nastavenia metrika chyba
- 1 a rrmse 29.3858
- 2 a rmae  23.2617
- 3 b rrmse 25.1673
- 4 b rmae  19.1493
- 5 c rrmse 24.8781
- 6 c rmae  18.8399')
-library(ggplot2)
-ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
- geom_bar(stat="identity", position = "dodge", show.legend = F) + 
- scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 9)
-```
+![plot of chunk unnamed-chunk-8](presentation-figure/unnamed-chunk-8-1.png)
+***
+- a = prvotný kód
+- b = alokácia pamäti, vektorizované výpočty, matica namiesto tabuľky
+- c = paralelizované
+
+Intel(R) Core(TM) i5-2450M CPU @ 2.50GHz
+
+2 jadrá - 4 thready
+
