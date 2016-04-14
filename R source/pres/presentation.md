@@ -21,27 +21,27 @@ Prehľad
   - záznamy z produkcie FVE (fotovoltaických elektrární)
   - slnečné koordináty / solárne dáta
   - PostgreSQL
-- Model predpovede
+- Predikčný model
   - R
   - random forest
 
 Dáta
 ========================================================
-- 24 hodín dopredu
 - Aladin
-  - dátum a čas v UTC, hodinové kroky
+  - model numerickej predpovede počasia
+  - 24 hodín dopredu 
+  - čas v UTC, hodinové kroky
+  - bodové záznamy => konkrétny bod na časovej osi
   - teplota
   - rýchlosť vetra
   - celková oblačnosť (%)
   - relatívna vlhkosť (%)
   - globálne ožiarenie
-  - <div class="notimportant">smer vetra</div>
-  - <div class="notimportant">atmosferický tlak</div>
-  - bodové záznamy => konkrétny bod na časovej osi
 
 ========================================================
+<br>      
 - FVE
-  - dátum a čas v CEST, 15-minutové kroky
+  - čas v CEST, 15-minutové kroky
   - <div class="notimportant">výkon [kW]</div>
   - energia (práca) [kWh]
   - intervalové záznamy => záznam z 12:00 = 11:45 - 12:00
@@ -71,7 +71,7 @@ Metriky presnosti
 ========================================================
 - hodnoty nameranej vyprodukovanej energie sú sčítané za celý deň
 - predpovedaná hodnota - $y_{i,p}$, skutočná hodnota - $y_{i,s}$ 
-- odmocnená stredná kvadratická chyba
+- odmocnina zo strednej kvadratickej chyby
 $$RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_{i,p} - y_{i,s})^n}$$
 - priemerná absolútna chyba
 $$MAE=\frac{1}{N}\sum_{i=1}^{N}|y_{i,p} - y_{i,s}|$$
@@ -92,7 +92,7 @@ Random forest
 - každý strom z náhodnej podmnožiny prediktorov
 - každý uzol je vytvorený ako najlepšie možné rozdelenie, podľa prediktorov náhodne vybraných pri danom uzle
 - výber prediktorov do podmnožín má normálne rozdelenie
-- výstup je najpočetnejší hlas (klasifikácia), resp. priemer hlasov (regresia) 
+- výstup je priemer hlasov (regresia) 
 
 
 ```r
@@ -104,7 +104,7 @@ output <- predict(forest, test_set, type="response", norm.votes=TRUE)
 
 Nastavenia modelu
 ========================================================
-- po dnoch: 
+- po dňoch: 
   - počet stromov: 700
   - počet uzlov stromu: 2 z 5
   - veľkosť trénovacej množiny: 110
@@ -117,42 +117,42 @@ Nastavenia modelu
   
 Výber trénovacej množiny
 ========================================================
-- najpodobnejšie dni
+- najpodobnejšie dni/hodiny
 - faktory podobnosti:
   - globálne žiarenie: 90
   - teplota: 10
   - vietor: 1
   
-<!-- - po hodinách: -->
+
+```r
+diff <- sapply(1:length(diff), function(x) {
+  ret <- abs(hour[['gho']] - potencial[[x,'gho']]) * 100 / scale[['gho']] * 90
+  return(ret)
+})
+```
+
 
 Výsledky
 ========================================================
-left: 60%
-![plot of chunk unnamed-chunk-4](presentation-figure/unnamed-chunk-4-1.png)
+left: 50%
+![plot of chunk unnamed-chunk-5](presentation-figure/unnamed-chunk-5-1.png)
 ***
 - červená = RRMSE
 - modrá = RMAE
 
 - predch. 30 dní
-- žiarenie * 1 
 - žiarenie * 90   
 `+` teplota * 10   
 `+` vietor * 1
 
 Leto vs. zima
 ========================================================
+left: 50%
 - leto = 21. marec až 23. september = 636 dní
 - zima = 24. september až 20. marec = 513 dní
-- 2.4 x viac vyrobenej energie v lete
-- 2.34 x menšia RRMSE v lete
-- 2.44 x menšia RMAE v lete
+- 2.4 x menšia chyba v lete
 
-========================================================
-left: 50%
-Výroba
-![plot of chunk unnamed-chunk-5](presentation-figure/unnamed-chunk-5-1.png)
 ***
-Chyba predikcie
 ![plot of chunk unnamed-chunk-6](presentation-figure/unnamed-chunk-6-1.png)
 
 ========================================================
@@ -176,26 +176,37 @@ predikcia po dňoch:
 po hodinách:
 ![plot of chunk unnamed-chunk-8](presentation-figure/unnamed-chunk-8-1.png)
 
-
+Najpresnejšia predikcia
 ========================================================
 left:
-
-podobnosť:
-- žiarenie: 220    
-- oblačnosť: 80      
-- teplota: 30      
-- vietor: 5     
-- dĺžka dňa: 50   
+- po hodinách
+- faktory podobnosti:
+  - žiarenie: 190    
+  - oblačnosť: 90      
+  - teplota: 30      
+  - vietor: 5.5
+  - vlhkosť: 1.5
+  - dĺžka dňa: 53
+  - elevácia: 1270
 
 ***
 ![plot of chunk unnamed-chunk-9](presentation-figure/unnamed-chunk-9-1.png)
+
+========================================================
+left: 50%
+Výroba - priemer na deň
+![plot of chunk unnamed-chunk-10](presentation-figure/unnamed-chunk-10-1.png)
+***
+Chyba predikcie
+![plot of chunk unnamed-chunk-11](presentation-figure/unnamed-chunk-11-1.png)
+
 
 
 Zrýchlenie výpočtov v R
 ========================================================
 - alokácia pamäti
 - vektorizácia (namiesto cyklov)
-- matica namiesto data.frame
+- matica namiesto tabuľky
 - paralelizmus
 
 
@@ -212,7 +223,7 @@ stopCluster(cl)
 
 ========================================================
 
-![plot of chunk unnamed-chunk-11](presentation-figure/unnamed-chunk-11-1.png)
+![plot of chunk unnamed-chunk-13](presentation-figure/unnamed-chunk-13-1.png)
 ***
 - a = prvotný kód
 - b = alokácia pamäti, vektorizované výpočty, matica namiesto tabuľky
@@ -224,10 +235,11 @@ Intel(R) Core(TM) i5-2450M CPU @ 2.50GHz
 
 Pokračovanie
 ========================================================
+- zlepšiť výber najpodobnejších záznamov do trénovacej množiny
 - vyskúšať iné predikčné metódy (neurónová sieť, quantile random forest, support vector machine)
   - potreba procesorového času
   - malý potenciál pre zlepšenie
-- postprocessing - štatistické spracovanie predpovedí
+- postprocessing - štatistická úprava predpovedí
   - veľký potenciál pre zlepšenie
   - veľká náročnosť 
   - potreba človekohodín 

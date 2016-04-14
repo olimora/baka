@@ -7,7 +7,7 @@
   source('~/GitHub/baka/R source/presentation_tests/functions.R')
 }
 
-cl <- makeCluster(2, type='SOCK')
+cl <- makeCluster(4, type='SOCK')
 
 clusterEvalQ(cl, format.time <- function(x) UseMethod("format.time"))
 clusterEvalQ(cl, { library(plyr); library(randomForest) })
@@ -21,13 +21,13 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
   f.mtry <- 2
   f.nodesize <- 3
   
-  pod_gho <- 90 #c(190)
-  pod_obl <- 0 #c(100)
-  pod_tep <- 10 #c(30)
-  pod_vie <- 1 #c(5.5)
-  pod_vlh <- 0 #c(1.5)
-  pod_dlz <- 0 #c(53)
-  pod_ele <- 0 #c(1270)
+  pod_gho <- c(190)
+  pod_obl <- c(100)
+  pod_tep <- c(30)
+  pod_vie <- c(5.5)
+  pod_vlh <- c(1.5)
+  pod_dlz <- c(53)
+  pod_ele <- c(1270)
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -45,7 +45,10 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 
 {
   #pocet vsetkyc dni - pocitam percenta
-  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data) s1) s2")
+  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data 
+                             where to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
+                             or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000')
+  ) s1) s2")
   prog.baseAll <- prog.baseAll$ccc
   prog.opsAll <- length(tm.velkost) * length(f.ntree) * length(f.mtry) * 
     length(pod_gho) * length(pod_obl) * length(pod_tep) * length(pod_vie) * 
@@ -60,7 +63,10 @@ print(sprintf("Start: %s ", time.start), quote = F)
 
 select <- " SELECT datum, cas, praca, gho, oblacnost, 
 teplota, vietor, vlhkost, dlzkadna, elev
-FROM v_data WHERE fve = %d ORDER BY cas"
+FROM v_data WHERE fve = %d 
+and (to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
+                             or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000'))
+ORDER BY cas"
 
 hours_done <- 0
 ops_done <- 0
@@ -178,7 +184,7 @@ for (i.pod_ele in pod_ele) {
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
                                   time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_hod",
                                   stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
-                                  i.velkost, "30 najpodob hodin", select, "vsetky", "hod",
+                                  i.velkost, "30 najpodob hodin", "select", "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,
                                   TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE)
                 
@@ -188,7 +194,10 @@ for (i.pod_ele in pod_ele) {
               #stats_day
               all_data <-  dbGetQuery(db.con, "SELECT fve, datum, cas, gho, oblacnost,
                                       teplota, vietor, vlhkost, dlzkadna, elev, praca
-                                      FROM v_data ORDER BY fve, cas")
+                                      FROM v_data 
+                                      WHERE to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
+                             or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000')
+                                      ORDER BY fve, cas")
               all_data <- cbind(all_data, output)
               to_see <- cbind(all_data, dif = abs(output - actual) * 100 / actual)
               to_see <- arrange(to_see, to_see$dif)
@@ -215,7 +224,7 @@ for (i.pod_ele in pod_ele) {
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
                                   time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_den",
                                   stats_day$N, stats_day$MBE, stats_day$RMBE, stats_day$RMSE, stats_day$RRMSE, stats_day$MAE, stats_day$RMAE, stats_day$MPE, stats_day$MAXAE, stats_day$SD,
-                                  i.velkost, "30 najpodob hodin", select, "vsetky", "hod",
+                                  i.velkost, "30 najpodob hodin", "select", "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,
                                   TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE)
                 

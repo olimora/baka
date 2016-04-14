@@ -21,27 +21,27 @@ Prehľad
   - záznamy z produkcie FVE (fotovoltaických elektrární)
   - slnečné koordináty / solárne dáta
   - PostgreSQL
-- Model predpovede
+- Predikčný model
   - R
   - random forest
 
 Dáta
 ========================================================
-- 24 hodín dopredu
 - Aladin
-  - dátum a čas v UTC, hodinové kroky
+  - model numerickej predpovede počasia
+  - 24 hodín dopredu 
+  - čas v UTC, hodinové kroky
+  - bodové záznamy => konkrétny bod na časovej osi
   - teplota
   - rýchlosť vetra
   - celková oblačnosť (%)
   - relatívna vlhkosť (%)
   - globálne ožiarenie
-  - <div class="notimportant">smer vetra</div>
-  - <div class="notimportant">atmosferický tlak</div>
-  - bodové záznamy => konkrétny bod na časovej osi
 
 ========================================================
+<br>      
 - FVE
-  - dátum a čas v CEST, 15-minutové kroky
+  - čas v CEST, 15-minutové kroky
   - <div class="notimportant">výkon [kW]</div>
   - energia (práca) [kWh]
   - intervalové záznamy => záznam z 12:00 = 11:45 - 12:00
@@ -70,7 +70,7 @@ Metriky presnosti
 ========================================================
 - hodnoty nameranej vyprodukovanej energie sú sčítané za celý deň
 - predpovedaná hodnota - $y_{i,p}$, skutočná hodnota - $y_{i,s}$ 
-- odmocnená stredná kvadratická chyba
+- odmocnina zo strednej kvadratickej chyby
 $$RMSE=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_{i,p} - y_{i,s})^n}$$
 - priemerná absolútna chyba
 $$MAE=\frac{1}{N}\sum_{i=1}^{N}|y_{i,p} - y_{i,s}|$$
@@ -90,7 +90,7 @@ Random forest
 - každý strom z náhodnej podmnožiny prediktorov
 - každý uzol je vytvorený ako najlepšie možné rozdelenie, podľa prediktorov náhodne vybraných pri danom uzle
 - výber prediktorov do podmnožín má normálne rozdelenie
-- výstup je najpočetnejší hlas (klasifikácia), resp. priemer hlasov (regresia) 
+- výstup je priemer hlasov (regresia) 
 
 ```{r, eval=FALSE}
 library(randomForest)
@@ -102,7 +102,7 @@ output <- predict(forest, test_set, type="response", norm.votes=TRUE)
 
 Nastavenia modelu
 ========================================================
-- po dnoch: 
+- po dňoch: 
   - počet stromov: 700
   - počet uzlov stromu: 2 z 5
   - veľkosť trénovacej množiny: 110
@@ -115,25 +115,29 @@ Nastavenia modelu
   
 Výber trénovacej množiny
 ========================================================
-- najpodobnejšie dni
+- najpodobnejšie dni/hodiny
 - faktory podobnosti:
   - globálne žiarenie: 90
   - teplota: 10
   - vietor: 1
   
-<!-- - po hodinách: -->
+```{r, eval=FALSE}
+diff <- sapply(1:length(diff), function(x) {
+  ret <- abs(hour[['gho']] - potencial[[x,'gho']]) * 100 / scale[['gho']] * 90
+  return(ret)
+})
+```
+
 
 Výsledky
 ========================================================
-left: 60%
+left: 50%
 ```{r, echo=FALSE}
 vys  <- read.table(header = T, text='nastavenia metrika chyba
- 1 a rrmse 29.3858
- 2 a rmae  23.2617
- 3 b rrmse 25.1673
- 4 b rmae  19.1493
- 5 c rrmse 24.8781
- 6 c rmae  18.8399')
+ 1 a rrmse 29.39
+ 2 a rmae  23.26
+ 3 b rrmse 24.88
+ 4 b rmae  18.84')
 vys$metrika <- factor(vys$metrika, levels = c("rrmse", "rmae"))
 library(ggplot2)
 ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
@@ -146,35 +150,18 @@ ggplot(vys, aes(nastavenia, chyba, fill = metrika)) +
 - modrá = RMAE
 
 - predch. 30 dní
-- žiarenie * 1 
 - žiarenie * 90   
 `+` teplota * 10   
 `+` vietor * 1
 
 Leto vs. zima
 ========================================================
+left: 50%
 - leto = 21. marec až 23. september = 636 dní
 - zima = 24. september až 20. marec = 513 dní
-- 2.4 x viac vyrobenej energie v lete
-- 2.34 x menšia RRMSE v lete
-- 2.44 x menšia RMAE v lete
+- 2.4 x menšia chyba v lete
 
-========================================================
-left: 50%
-Výroba
-```{r, echo=FALSE}
-df  <- read.table(header = T, text='obdobie vyrobene
- 1 zima 683.63
- 2 leto 1646.82')
-df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
-library(ggplot2)
-ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
-  geom_bar(stat="identity") + 
- geom_text(aes(label = vyrobene, y = vyrobene), size = 15) + 
- scale_fill_brewer(palette = "Set1")
-```
 ***
-Chyba predikcie
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie metrika chyba
  1 zima rrmse 45.7
@@ -226,12 +213,12 @@ ggplot(df, aes(data, chyba, fill = metrika)) +
 po hodinách:
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='data metrika chyba
- 1 all rrmse 22.65
- 2 all rmae  17.41
- 3 svit rrmse 21.27
- 4 svit rmae  16.27
- 5 pp  rrmse 20.3
- 6 pp  rmae  15.2')
+ 1 all rrmse 25.12
+ 2 all rmae  19.36
+ 3 svit rrmse 23.62
+ 4 svit rmae  18.15
+ 5 pp  rrmse 22.66
+ 6 pp  rmae  17.14')
 df$data <- factor(df$data, levels = c("all", "svit", "pp"))
 df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
 library(ggplot2)
@@ -241,26 +228,28 @@ ggplot(df, aes(data, chyba, fill = metrika)) +
   geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
 
-
+Najpresnejšia predikcia
 ========================================================
 left:
-
-podobnosť:
-- žiarenie: 220    
-- oblačnosť: 80      
-- teplota: 30      
-- vietor: 5     
-- dĺžka dňa: 50   
+- po hodinách
+- faktory podobnosti:
+  - žiarenie: 190    
+  - oblačnosť: 90      
+  - teplota: 30      
+  - vietor: 5.5
+  - vlhkosť: 1.5
+  - dĺžka dňa: 53
+  - elevácia: 1270
 
 ***
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='data metrika chyba
- 1 all rrmse 19.22
- 2 all rmae  14.3
- 3 svit rrmse 18.4
- 4 svit rmae  13.72
- 5 pp  rrmse 17.79
- 6 pp  rmae  13.11')
+ 1 all rrmse 24.55
+ 2 all rmae  18.66
+ 3 svit rrmse 23.17
+ 4 svit rmae  17.53
+ 5 pp  rrmse 22.36
+ 6 pp  rmae  16.79')
 df$data <- factor(df$data, levels = c("all", "svit", "pp"))
 df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
 library(ggplot2)
@@ -269,13 +258,45 @@ ggplot(df, aes(data, chyba, fill = metrika)) +
  scale_fill_brewer(palette = "Set1") +
   geom_text(aes(label = chyba, y = chyba), size = 15)
 ```
+
+========================================================
+left: 50%
+Výroba - priemer na deň
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='obdobie vyrobene
+ 1 zima 683.63
+ 2 leto 1646.82')
+df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
+library(ggplot2)
+ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
+  geom_bar(stat="identity") + 
+ geom_text(aes(label = vyrobene, y = vyrobene), size = 15) + 
+ scale_fill_brewer(palette = "Set1")
+```
+***
+Chyba predikcie
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='obdobie metrika chyba
+ 1 zima rrmse 36.1
+ 2 zima rmae  26.94
+ 3 leto rrmse 18.95
+ 4 leto rmae  14.4')
+df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
+df$metrika <- factor(df$metrika, levels = c("rrmse", "rmae"))
+library(ggplot2)
+ggplot(df, aes(obdobie, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = F) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), size = 15)
+```
+
 
 
 Zrýchlenie výpočtov v R
 ========================================================
 - alokácia pamäti
 - vektorizácia (namiesto cyklov)
-- matica namiesto data.frame
+- matica namiesto tabuľky
 - paralelizmus
 
 
@@ -313,10 +334,11 @@ Intel(R) Core(TM) i5-2450M CPU @ 2.50GHz
 
 Pokračovanie
 ========================================================
+- zlepšiť výber najpodobnejších záznamov do trénovacej množiny
 - vyskúšať iné predikčné metódy (neurónová sieť, quantile random forest, support vector machine)
   - potreba procesorového času
   - malý potenciál pre zlepšenie
-- postprocessing - štatistické spracovanie predpovedí
+- postprocessing - štatistická úprava predpovedí
   - veľký potenciál pre zlepšenie
   - veľká náročnosť 
   - potreba človekohodín 

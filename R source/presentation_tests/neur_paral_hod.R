@@ -2,7 +2,7 @@
 {
   library(RPostgreSQL)
   library(plyr)
-  library(randomForest)
+  library(neuralnet)
   library(snow)
   source('~/GitHub/baka/R source/presentation_tests/functions.R')
 }
@@ -10,7 +10,7 @@
 cl <- makeCluster(4, type='SOCK')
 
 clusterEvalQ(cl, format.time <- function(x) UseMethod("format.time"))
-clusterEvalQ(cl, { library(plyr); library(randomForest) })
+clusterEvalQ(cl, { library(plyr); library(neuralnet) })
 
 
 {
@@ -101,7 +101,7 @@ for (i.fve in fve) {
                          "i.pod_vlh", "i.pod_ele",
                          "i.ntree", "i.mtry", "i.velkost"))
   fve_output <- parSapply(cl, 1:nrow(chosen_hours), function(y) {
-    hourh <- chosen_hours[1,]
+    hourh <- chosen_hours[y,]
     potencial <- all_hours[all_hours[,'datum'] != hourh[['datum']],]
     diff <- vector(mode = "numeric", length = nrow(potencial))
     
@@ -116,15 +116,32 @@ for (i.fve in fve) {
       return(ret)
     })
     
-    train_set <- arrange(as.data.frame(potencial), diff)[1:i.velkost,]
-    #train_set <- arrange(as.data.frame(potencial), diff)[i.velkost:1,]
+    #train_set <- arrange(as.data.frame(potencial), diff)[1:i.velkost,]
+    train_set <- arrange(as.data.frame(potencial), diff)[i.velkost:1,]
     
-    forest <- randomForest(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev,
-                           data=train_set, nodesize = 3)
-    predic <- predict(forest, data.frame(gho = hourh[['gho']], oblacnost = hourh[['oblacnost']],
-                                         teplota = hourh[['teplota']], vietor = hourh[['vietor']],
-                                         vlhkost = hourh[['vlhkost']], dlzkadna = hourh[['dlzkadna']],
-                                         elev = hourh[['elev']]), type="response", norm.votes=TRUE)
+    f_train_set <- train_set
+    # for (name in names(f_train_set)) {
+    #   f_train_set[[name]] <- factor(f_train_set[[name]])
+    # }
+    
+    f_hourh <- data.frame(gho = hourh[['gho']], oblacnost = hourh[['oblacnost']],
+                          teplota = hourh[['teplota']], vietor = hourh[['vietor']],
+                          vlhkost = hourh[['vlhkost']], dlzkadna = hourh[['dlzkadna']],
+                          elev = hourh[['elev']])
+    # for (name in names(f_hourh)) {
+    #   f_hourh[[name]] <- factor(f_hourh[[name]])
+    # }
+    
+    nnet <- neuralnet(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev,
+                      f_train_set, #startweights = e.neural_startweights,
+                       hidden= c(7,5,3) #,threshold=e.neural_threshold
+                      )
+    predic <- compute(nnet, f_hourh)$net.result
+    #plot(nnet)
+    
+    # forest <- randomForest(as.factor(praca)~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev,
+    #                        data=f_train_set)
+    # predic <- predict(forest, f_hourh, type="response", norm.votes=TRUE)
     #varImpPlot(forest)
     
     return(predic)
@@ -194,8 +211,8 @@ print(sprintf("Start: %s, End: %s, Duration: %s",
 # if (exists("db.con")) dbDisconnect(db.con)
 db.con <- getConnection(db.drv)
 all_data <-  dbGetQuery(db.con, "SELECT fve, datum, cas, gho, oblacnost,
-                      teplota, vietor, vlhkost, dlzkadna, elev, praca
-                      FROM v_data ORDER BY fve, cas")
+                        teplota, vietor, vlhkost, dlzkadna, elev, praca
+                        FROM v_data ORDER BY fve, cas")
 all_data <- cbind(all_data, output)
 to_see <- cbind(all_data, dif = abs(output - actual) * 100 / actual)
 to_see <- arrange(to_see, to_see$dif)
