@@ -7,7 +7,7 @@
   source('~/GitHub/baka/R source/presentation_tests/functions.R')
 }
 
-cl <- makeCluster(2, type='SOCK')
+cl <- makeCluster(4, type='SOCK')
 
 clusterEvalQ(cl, format.time <- function(x) UseMethod("format.time"))
 clusterEvalQ(cl, { library(plyr); library(randomForest) })
@@ -21,13 +21,13 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
   f.mtry <- 2
   f.nodesize <- 3
   
-  pod_gho <- 90 #c(190)
-  pod_obl <- 0 #c(100)
-  pod_tep <- 10 #c(30)
-  pod_vie <- 1 #c(5.5)
-  pod_vlh <- 0 #c(1.5)
-  pod_dlz <- 0 #c(53)
-  pod_ele <- 0 #c(1270)
+  pod_gho <- c(190)
+  pod_obl <- c(100)
+  pod_tep <- c(30)
+  pod_vie <- c(5.5)
+  pod_vlh <- c(1.5)
+  pod_dlz <- c(53)
+  pod_ele <- c(1270)
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -101,11 +101,12 @@ for (i.pod_ele in pod_ele) {
                 chosen_hours <- all_hours
                 
                 fve_actual <- chosen_hours[,'praca']
+                ciel <- 0
                 
                 clusterExport(cl, list("chosen_hours", "all_hours", "scale",
                                        "i.pod_gho", "i.pod_obl", "i.pod_tep", "i.pod_vie", "i.pod_dlz",
                                        "i.pod_vlh", "i.pod_ele",
-                                       "i.ntree", "i.mtry", "i.velkost", "i.nodesize"))
+                                       "i.ntree", "i.mtry", "i.velkost", "i.nodesize", "ciel"))
                 fve_output <- parSapply(cl, 1:nrow(chosen_hours), function(y) {
                   hourh <- chosen_hours[y,]
                   potencial <- all_hours[all_hours[,'datum'] != hourh[['datum']],]
@@ -123,13 +124,15 @@ for (i.pod_ele in pod_ele) {
                   })
                   
                   train_set <- arrange(as.data.frame(potencial), diff)[1:i.velkost,]
+                  train_set$ciel <- train_set$praca
                   
-                  forest <- randomForest(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev,
+                  forest <- randomForest(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev+ciel,
                                          data=train_set, ntree = i.ntree, mtry = i.mtry, nodesize = i.nodesize)
                   predic <-predict(forest, data.frame(gho = hourh[['gho']], oblacnost = hourh[['oblacnost']],
                                                       teplota = hourh[['teplota']], vietor = hourh[['vietor']],
                                                       vlhkost = hourh[['vlhkost']], dlzkadna = hourh[['dlzkadna']],
-                                                      elev = hourh[['elev']]), type="response", norm.votes=TRUE)
+                                                      elev = hourh[['elev']]), ciel = train_set[1,'ciel'], 
+                                   type="response", norm.votes=TRUE)
                   # varImpPlot(forest)
                   
                   return(predic)
