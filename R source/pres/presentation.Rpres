@@ -313,15 +313,19 @@ stopCluster(cl)
 ========================================================
 
 ```{r, echo=FALSE}
-casy  <- read.table(header = T, text='sposob velkost sekundy
- 1 a m 87
- 2 b m 35
- 3 c m 16')
+casy  <- read.table(header = T, text='sposob sekundy
+ 1 A 87
+ 2 B 35
+ 3 C 16')
 library(ggplot2)
-ggplot(casy, aes(sposob, sekundy, fill = velkost)) + 
- geom_bar(stat="identity", position = "dodge", show.legend = F) + 
- geom_text(aes(label = sekundy, y = sekundy), size = 9) + 
- scale_fill_brewer(palette = "Set1")
+ggplot(casy, aes(sposob, sekundy, fill = sposob)) + 
+  geom_bar(stat="identity", position = "dodge", show.legend = F) + 
+  geom_text(aes(label = sekundy, y = sekundy), size = 9) + 
+  scale_fill_brewer(palette = "Set1") + 
+  theme(text = element_text(size = 25)) +
+  xlab("Zmeny v zdrojovom kóde") +
+  ylab("Počet sekúnd") + 
+  ggtitle("Porovnanie časov \n vykonávania skriptu")
 ```
 ***
 - a = prvotný kód
