@@ -134,16 +134,23 @@ Výsledky
 left: 50%
 ```{r, echo=FALSE}
 vys  <- read.table(header = T, text='nastavenia metrika chyba
- 1 a rrmse 29.39
- 2 a rmae  23.26
- 3 b rrmse 24.88
- 4 b rmae  18.84')
-vys$metrika <- factor(vys$metrika, levels = c("rrmse", "rmae"))
+ 1 "30 predch. dní" rRMSE 29.39
+ 2 "30 predch. dní" rMAE  23.26
+ 3 "30 najpodob. dní" rRMSE 24.88
+ 4 "30 najpodob. dní" rMAE  18.84')
+vys$metrika <- factor(vys$metrika, levels = c("rRMSE", "rMAE"))
+vys$nastavenia <- factor(vys$nastavenia, levels = c("30 predch. dní", "30 najpodob. dní"))
 library(ggplot2)
 ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
- geom_bar(stat="identity", position = "dodge", show.legend = F) + 
- scale_fill_brewer(palette = "Set1") +
-  geom_text(aes(label = chyba, y = chyba), size = 15)
+  geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+  scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Trénovacia množina") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 32))
 ```
 ***
 - červená = RRMSE
@@ -314,18 +321,20 @@ stopCluster(cl)
 
 ```{r, echo=FALSE}
 casy  <- read.table(header = T, text='sposob sekundy
- 1 A 87
- 2 B 35
- 3 C 16')
+ 1 "bez zmien" 87
+ 2 "matica, alokácia,\nvektorové funkcie, " 35
+ 3 "paralelizácia" 16')
 library(ggplot2)
 ggplot(casy, aes(sposob, sekundy, fill = sposob)) + 
   geom_bar(stat="identity", position = "dodge", show.legend = F) + 
-  geom_text(aes(label = sekundy, y = sekundy), size = 9) + 
+  geom_text(aes(label = sekundy, y = sekundy), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
   scale_fill_brewer(palette = "Set1") + 
   theme(text = element_text(size = 25)) +
   xlab("Zmeny v zdrojovom kóde") +
   ylab("Počet sekúnd") + 
-  ggtitle("Porovnanie časov \n vykonávania skriptu")
+ # ggtitle("Porovnanie časov \n vykonávania skriptu")+ 
+  scale_y_continuous(limits = c(0, 95))
 ```
 ***
 - a = prvotný kód
