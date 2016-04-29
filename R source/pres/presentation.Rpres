@@ -202,9 +202,9 @@ predikcia po dňoch:
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='data metrika chyba
  1 all rrmse 25.32
- 2 all rmae  18.92
+ 2 all rmae  19.92
  3 svit rrmse 23.91
- 4 svit rmae  18.08
+ 4 svit rmae  19.08
  5 pp  rrmse 23.47
  6 pp  rmae  17.44')
 df$data <- factor(df$data, levels = c("all", "svit", "pp"))
@@ -271,15 +271,22 @@ left: 50%
 Výroba - priemer na deň
 ```{r, echo=FALSE}
 df  <- read.table(header = T, text='obdobie vyrobene
- 1 zima 683.63
- 2 leto 1646.82')
+ 1 zima 683.3
+ 2 leto 1646.8')
 df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
 library(ggplot2)
 ggplot(data=df, aes(x=obdobie, y=vyrobene)) +
   geom_bar(stat="identity") + 
- geom_text(aes(label = vyrobene, y = vyrobene), size = 15) + 
- scale_fill_brewer(palette = "Set1")
+ geom_text(aes(label = vyrobene, y = vyrobene), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+ scale_fill_brewer(palette = "Set1") + 
+  theme(text = element_text(size = 25)) +
+  xlab("Obdobie") +
+  ylab("Priem. denná produkcia [kWh]") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 1800))
 ```
+
 ***
 Chyba predikcie
 ```{r, echo=FALSE}
@@ -356,4 +363,46 @@ Pokračovanie
   - veľká náročnosť 
   - potreba človekohodín 
 
+========================================================
+```{r, echo=FALSE}
+vys  <- read.table(header = T, text='nastavenia metrika chyba
+ 1 "po dňoch" rRMSE 25.29
+ 2 "po dňoch" rMAE  19.18
+ 3 "po hodinách" rRMSE 24.55
+ 4 "po hodinách" rMAE  18.65')
+vys$metrika <- factor(vys$metrika, levels = c("rRMSE", "rMAE"))
+#vys$nastavenia <- factor(vys$nastavenia, levels = c("30 predch. dní", "30 najpodob. dní"))
+library(ggplot2)
+ggplot(vys, aes(nastavenia, chyba, fill = metrika)) + 
+  geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+  scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Spôsob predikcie") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 28))
+```
 
+========================================================
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='obdobie metrika chyba
+ 1 zima rRMSE 41.39
+ 2 zima rMAE  31.77
+ 3 leto rRMSE 19.00
+ 4 leto rMAE  14.28')
+df$obdobie <- factor(df$obdobie, levels = c("zima", "leto"))
+df$metrika <- factor(df$metrika, levels = c("rRMSE", "rMAE"))
+library(ggplot2)
+ggplot(df, aes(obdobie, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Obdobie") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 45))
+```

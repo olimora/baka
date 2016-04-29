@@ -16,9 +16,9 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 {
   write_results <- F
   fve <- c(1, 2, 3)
-  tm.velkost <- c(130, 110, 90, 70, 50, 30) [6]
-  f.ntree <- c(1000, 700, 500, 300, 100) [2]
-  f.mtry <- c(2)
+  tm.velkost <- 30
+  f.ntree <- 500
+  f.mtry <- 2
   
   pod_gho <- c(240, 220, 200, 0)[2]
   pod_obl <- c(90, 80, 70, 0)[2]

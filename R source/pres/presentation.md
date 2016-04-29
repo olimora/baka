@@ -196,6 +196,7 @@ left:
 left: 50%
 Výroba - priemer na deň
 ![plot of chunk unnamed-chunk-10](presentation-figure/unnamed-chunk-10-1.png)
+
 ***
 Chyba predikcie
 ![plot of chunk unnamed-chunk-11](presentation-figure/unnamed-chunk-11-1.png)
@@ -244,4 +245,8 @@ Pokračovanie
   - veľká náročnosť 
   - potreba človekohodín 
 
+========================================================
+![plot of chunk unnamed-chunk-14](presentation-figure/unnamed-chunk-14-1.png)
 
+========================================================
+![plot of chunk unnamed-chunk-15](presentation-figure/unnamed-chunk-15-1.png)

@@ -21,13 +21,13 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
   f.mtry <- 2
   f.nodesize <- 3
   
-  pod_gho <- c(190)
-  pod_obl <- c(100)
-  pod_tep <- c(30)
-  pod_vie <- c(5.5)
-  pod_vlh <- c(1.5)
-  pod_dlz <- c(53)
-  pod_ele <- c(1270)
+  pod_gho <- 90 #c(190)
+  pod_obl <- 0 #c(100)
+  pod_tep <- 10 #c(30)
+  pod_vie <- 1 #c(5.5)
+  pod_vlh <- 0 #c(1.5)
+  pod_dlz <- 0 #c(53)
+  pod_ele <- 0 #c(1270)
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -45,7 +45,7 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 
 {
   #pocet vsetkyc dni - pocitam percenta
-  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data) s1) s2")
+  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data_all) s1) s2")
   prog.baseAll <- prog.baseAll$ccc
   prog.opsAll <- length(tm.velkost) * length(f.ntree) * length(f.mtry) * 
     length(pod_gho) * length(pod_obl) * length(pod_tep) * length(pod_vie) * 
@@ -60,15 +60,17 @@ print(sprintf("Start: %s ", time.start), quote = F)
 
 select <- " SELECT datum, cas, praca, gho, oblacnost, 
 teplota, vietor, vlhkost, dlzkadna, elev
-FROM v_data WHERE fve = %d ORDER BY cas"
+FROM v_data_all WHERE fve = %d ORDER BY cas"
 
 hours_done <- 0
 ops_done <- 0
 
 i.velkost <- tm.velkost
 i.ntree <- f.ntree
-i.mtry <- f.mtry
+#i.mtry <- f.mtry
 i.nodesize <- f.nodesize
+
+for (i.mtry in f.mtry) {
 
 for (i.pod_ele in pod_ele) {
   for (i.pod_vlh in pod_vlh) {
@@ -126,12 +128,12 @@ for (i.pod_ele in pod_ele) {
                   train_set <- arrange(as.data.frame(potencial), diff)[1:i.velkost,]
                   train_set$ciel <- train_set$praca
                   
-                  forest <- randomForest(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev+ciel,
+                  forest <- randomForest(praca~gho+oblacnost+teplota+vietor+vlhkost+dlzkadna+elev,
                                          data=train_set, ntree = i.ntree, mtry = i.mtry, nodesize = i.nodesize)
                   predic <-predict(forest, data.frame(gho = hourh[['gho']], oblacnost = hourh[['oblacnost']],
                                                       teplota = hourh[['teplota']], vietor = hourh[['vietor']],
                                                       vlhkost = hourh[['vlhkost']], dlzkadna = hourh[['dlzkadna']],
-                                                      elev = hourh[['elev']]), ciel = train_set[1,'ciel'], 
+                                                      elev = hourh[['elev']]), 
                                    type="response", norm.votes=TRUE)
                   # varImpPlot(forest)
                   
@@ -165,7 +167,7 @@ for (i.pod_ele in pod_ele) {
               # statistika presnosti
               stats <- all_statistics(actual, output)
               
-              if (write_results) {
+              if (write_results != write_results) {
                 for (name in names(stats)) {
                   if (is.infinite(stats[[name]]) | !is.numeric(stats[[name]]) | is.nan(stats[[name]])) stats[[name]] <- 999.999
                 }
@@ -179,7 +181,7 @@ for (i.pod_ele in pod_ele) {
                                   %d, '%s', '%s', '%s', '%s',
                                   %f, %f, %f, %f, %f, %f, %f, %f, %f,
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                                  time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_hod",
+                                  time.start, "random forest", "v_data_all", "ntree 500", "mtry 2", "nodesize 3", "stats_hod",
                                   stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
                                   i.velkost, "30 najpodob hodin", select, "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,
@@ -191,7 +193,7 @@ for (i.pod_ele in pod_ele) {
               #stats_day
               all_data <-  dbGetQuery(db.con, "SELECT fve, datum, cas, gho, oblacnost,
                                       teplota, vietor, vlhkost, dlzkadna, elev, praca
-                                      FROM v_data ORDER BY fve, cas")
+                                      FROM v_data_all ORDER BY fve, cas")
               all_data <- cbind(all_data, output)
               to_see <- cbind(all_data, dif = abs(output - actual) * 100 / actual)
               to_see <- arrange(to_see, to_see$dif)
@@ -216,7 +218,7 @@ for (i.pod_ele in pod_ele) {
                                   %d, '%s', '%s', '%s', '%s',
                                   %f, %f, %f, %f, %f, %f, %f, %f, %f,
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                                  time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_den",
+                                  time.start, "random forest", "v_data_all", "ntree 500", "mtry " %s% as.character(i.mtry), "nodesize 3", "stats_den",
                                   stats_day$N, stats_day$MBE, stats_day$RMBE, stats_day$RMSE, stats_day$RRMSE, stats_day$MAE, stats_day$RMAE, stats_day$MPE, stats_day$MAXAE, stats_day$SD,
                                   i.velkost, "30 najpodob hodin", select, "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,
@@ -236,7 +238,7 @@ for (i.pod_ele in pod_ele) {
     } # pod_gho
   } # pod_vlh
 } # pod_ele
-
+}
 
 time.end <- Sys.time()
 print(sprintf("Start: %s, End: %s, Duration: %s",

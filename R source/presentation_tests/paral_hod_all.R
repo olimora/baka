@@ -16,17 +16,17 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 {
   write_results <- F
   fve <- c(1, 2, 3)
-  tm.velkost <- c(130, 110, 90, 70, 50, 30) [6]
-  f.ntree <- c(1000, 700, 500, 300, 100) [3]
-  f.mtry <- c(2)
+  tm.velkost <- 30
+  f.ntree <- 500
+  f.mtry <- 2
   
-  pod_gho <- c(240, 220, 200, 0)[2]
-  pod_obl <- c(90, 80, 70, 0)[2]
-  pod_tep <- c(35, 30, 25, 0)[2]
-  pod_vie <- c(6, 5, 4, 0)[2]
-  pod_vlh <- c(0)
-  pod_dlz <- c(55, 50, 45, 0)[2]
-  pod_ele <- c(300)
+  pod_gho <- c(190)
+  pod_obl <- c(100)
+  pod_tep <- c(30)
+  pod_vie <- c(5.5)
+  pod_vlh <- c(1.5)
+  pod_dlz <- c(53)
+  pod_ele <- c(1270)
   
   prog.diff <- 0
   prog.printed_all <- -10000
@@ -157,25 +157,25 @@ for (i.fve in fve) {
 # statistika presnosti
 stats <- all_statistics(actual, output)
 
-# if (write_results) {
-#   for (name in names(stats)) {
-#     if (is.infinite(stats[[name]]) | !is.numeric(stats[[name]]) | is.nan(stats[[name]])) stats[[name]] <- 999.999
-#   }
-#   insert <- sprintf("INSERT INTO t_experiment (cas_behu, metoda, param1, param2, param3, param4, param5,
-#     N, MBE, RMBE, RMSE, RRMSE, MAE, RMAE, MPE, MAXAE, SD,
-#     tm_velkost, tm_opis, tm_select, fve, den_hod,
-#     in_gho, in_oblacnost, in_teplota, in_vietor, in_vlhkost, in_tlak, in_dlzkadna, in_azim, in_elev)
-#     VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s',
-#     %d, %f, %f, %f, %f, %f, %f, %f, %f, %f,
-#     %d, '%s', '%s', '%s', '%s',
-#     %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-#                     time.start, "random forest", "tm 30", "ntree 700", "mtry 2", "", "",
-#                     stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
-#                     30, "30 najpodob dni podla gho90, tep10, vie1", select, "vsetky", "den",
-#                     TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE)
-#
-#   db.result <- dbGetQuery(db.con, insert)
-# }
+if (write_results) {
+  for (name in names(stats)) {
+    if (is.infinite(stats[[name]]) | !is.numeric(stats[[name]]) | is.nan(stats[[name]])) stats[[name]] <- 999.999
+  }
+  insert <- sprintf("INSERT INTO t_experiment (cas_behu, metoda, param1, param2, param3, param4, param5,
+    N, MBE, RMBE, RMSE, RRMSE, MAE, RMAE, MPE, MAXAE, SD,
+    tm_velkost, tm_opis, tm_select, fve, den_hod,
+    in_gho, in_oblacnost, in_teplota, in_vietor, in_vlhkost, in_tlak, in_dlzkadna, in_azim, in_elev)
+    VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s',
+    %d, %f, %f, %f, %f, %f, %f, %f, %f, %f,
+    %d, '%s', '%s', '%s', '%s',
+    %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+                    time.start, "random forest", "tm 30", "ntree 700", "mtry 2", "", "",
+                    stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
+                    30, "30 najpodob dni podla gho90, tep10, vie1", select, "vsetky", "den",
+                    TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE)
+
+  db.result <- dbGetQuery(db.con, insert)
+}
 
 
 
