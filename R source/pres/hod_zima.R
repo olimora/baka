@@ -45,7 +45,7 @@ clusterEvalQ(cl, { library(plyr); library(randomForest) })
 
 {
   #pocet vsetkyc dni - pocitam percenta
-  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data_all 
+  prog.baseAll <- dbGetQuery(db.con, "select count(*) as ccc from (select distinct * from (select cas, fve from v_data 
                              where to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
                              or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000')
   ) s1) s2")
@@ -63,7 +63,7 @@ print(sprintf("Start: %s ", time.start), quote = F)
 
 select <- " SELECT datum, cas, praca, gho, oblacnost, 
 teplota, vietor, vlhkost, dlzkadna, elev
-FROM v_data_all WHERE fve = %d 
+FROM v_data WHERE fve = %d 
 and (to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
                              or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000'))
 ORDER BY cas"
@@ -182,7 +182,7 @@ for (i.pod_ele in pod_ele) {
                                   %d, '%s', '%s', '%s', '%s',
                                   %f, %f, %f, %f, %f, %f, %f, %f, %f,
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                                  time.start, "random forest", "v_data_all", "ntree 500", "mtry 2", "nodesize 3", "stats_hod",
+                                  time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_hod",
                                   stats$N, stats$MBE, stats$RMBE, stats$RMSE, stats$RRMSE, stats$MAE, stats$RMAE, stats$MPE, stats$MAXAE, stats$SD,
                                   i.velkost, "30 najpodob hodin", "select", "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,
@@ -194,7 +194,7 @@ for (i.pod_ele in pod_ele) {
               #stats_day
               all_data <-  dbGetQuery(db.con, "SELECT fve, datum, cas, gho, oblacnost,
                                       teplota, vietor, vlhkost, dlzkadna, elev, praca
-                                      FROM v_data_all 
+                                      FROM v_data 
                                       WHERE to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') <= to_date('20.3.2000', 'DD.MM.2000')
                              or to_date(to_char(datum, 'DD.MM.YYYY'), 'DD.MM.2000') > to_date('23.9.2000', 'DD.MM.2000')
                                       ORDER BY fve, cas")
@@ -222,7 +222,7 @@ for (i.pod_ele in pod_ele) {
                                   %d, '%s', '%s', '%s', '%s',
                                   %f, %f, %f, %f, %f, %f, %f, %f, %f,
                                   %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                                  time.start, "random forest", "v_data_all", "ntree 500", "mtry 2", "nodesize 3", "stats_den",
+                                  time.start, "random forest", "v_data", "ntree 500", "mtry 2", "nodesize 3", "stats_den",
                                   stats_day$N, stats_day$MBE, stats_day$RMBE, stats_day$RMSE, stats_day$RRMSE, stats_day$MAE, stats_day$RMAE, stats_day$MPE, stats_day$MAXAE, stats_day$SD,
                                   i.velkost, "30 najpodob hodin", "select", "vsetky", "hod",
                                   i.pod_gho, i.pod_obl, i.pod_tep, i.pod_vie, i.pod_vlh, 0, i.pod_dlz, 0, i.pod_ele,

@@ -182,7 +182,7 @@ left:
 - po hodinách
 - faktory podobnosti:
   - žiarenie: 190    
-  - oblačnosť: 90      
+  - oblačnosť: 100      
   - teplota: 30      
   - vietor: 5.5
   - vlhkosť: 1.5
@@ -250,3 +250,6 @@ Pokračovanie
 
 ========================================================
 ![plot of chunk unnamed-chunk-15](presentation-figure/unnamed-chunk-15-1.png)
+
+========================================================
+![plot of chunk unnamed-chunk-16](presentation-figure/unnamed-chunk-16-1.png)

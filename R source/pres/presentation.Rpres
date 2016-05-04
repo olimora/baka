@@ -241,7 +241,7 @@ left:
 - po hodinách
 - faktory podobnosti:
   - žiarenie: 190    
-  - oblačnosť: 90      
+  - oblačnosť: 100      
   - teplota: 30      
   - vietor: 5.5
   - vlhkosť: 1.5
@@ -405,4 +405,31 @@ ggplot(df, aes(obdobie, chyba, fill = metrika)) +
   ylab("Chyba") + 
   #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
   scale_y_continuous(limits = c(0, 45))
+```
+
+========================================================
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='dataset metrika chyba
+ 1 A rRMSE 24.53
+ 2 A rMAE  18.63
+ 3 B rRMSE 23.17
+ 4 B rMAE  17.52
+ 5 C rRMSE 22.34
+ 6 C rMAE  16.79
+ 7 D rRMSE 24.57
+ 8 D rMAE  18.65
+ 9 E rRMSE 23.18
+ 10 E rMAE 17.53 ')
+df$metrika <- factor(df$metrika, levels = c("rRMSE", "rMAE"))
+library(ggplot2)
+ggplot(df, aes(dataset, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Dátová množina") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 27))
 ```
