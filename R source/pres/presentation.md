@@ -253,3 +253,7 @@ Pokračovanie
 
 ========================================================
 ![plot of chunk unnamed-chunk-16](presentation-figure/unnamed-chunk-16-1.png)
+
+![plot of chunk unnamed-chunk-17](presentation-figure/unnamed-chunk-17-1.png)
+
+![plot of chunk unnamed-chunk-18](presentation-figure/unnamed-chunk-18-1.png)

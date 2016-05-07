@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "install.packages(\"microbenchmark\")\n\n# s listami a vlastny operator\nprva <- function(t, scale) {\n  t$differ <- c()\n  for (j in 1:nrow(t$train_set)) { #nrow(t$train_set)\n    t$differ[j] <- (\n      90 * (abs(t$chosen_one['gho'] - t$train_set[j,'gho']) %p% scale$scale[1]) \n      +\n        10 * (abs(t$chosen_one['teplota'] - t$train_set[j,'teplota']) %p% scale$scale[2])\n      +\n        (abs(t$chosen_one['vietor'] - t$train_set[j,'vietor']) %p% scale$scale[3])\n    )\n  }\n}\n\n# list bez operatora\ndruha <- function(t, scale) {\n  t$differ <- c()\n  for (j in 1:nrow(t$train_set)) { #nrow(t$train_set)\n    t$differ[j] <- (\n      90 * (abs(t$chosen_one['gho'] - t$train_set[j,'gho']) %p% scale$scale[1]) \n      +\n        10 * (abs(t$chosen_one['teplota'] - t$train_set[j,'teplota']) %p% scale$scale[2])\n      +\n        (abs(t$chosen_one['vietor'] - t$train_set[j,'vietor']) %p% scale$scale[3])\n    )\n  }\n}\n\n\nt$differ <- c()\nfor (j in 1:nrow(t$train_set)) { #nrow(t$train_set)\n  t$differ[j] <- (\n    90 * (abs(t$chosen_one['gho'] - t$train_set[j,'gho']) %p% scale$scale[1]) \n    +\n      10 * (abs(t$chosen_one['teplota'] - t$train_set[j,'teplota']) %p% scale$scale[2])\n    +\n      (abs(t$chosen_one['vietor'] - t$train_set[j,'vietor']) %p% scale$scale[3])\n  )\n}",
+    "created" : 1462606728563.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3373172626",
+    "id" : "F8DCD4FB",
+    "lastKnownWriteTime" : 1458906354,
+    "last_content_update" : 1458906354,
+    "path" : "~/GitHub/baka/R source/benchmarks.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
