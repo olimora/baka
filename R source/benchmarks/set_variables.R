@@ -13,7 +13,7 @@ library("RPostgreSQL")
   e$elev <- F
   e$dlzkadna <- F
   e$den_hod <- c("den", "hod")[1]
-  e$fve <- c("FVE Dubravy 1", "FVE Dubravy 2", "FVE Plesivec")
+  e$fve <- c("***", "***", "****")
   e$tren_mnoz <- "najpodobnejsich 20"
   e$tren_mnoz_velkost <- 60
   e$tren_mnoz_select <- "select datum, sum(gho) gho, sum(teplota) teplota,

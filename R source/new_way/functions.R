@@ -44,8 +44,6 @@ build_insert_stats <- function(e, stats, ttime, fve) {
 }
 build_insert_stats <- cmpfun(build_insert_stats)
 
-
-
 # format casu
 format.time <- function(x) UseMethod("format.time")
 format.time.difftime <- function(x) {
@@ -75,7 +73,7 @@ getConnection2 <- function(drv) {
                    port = 5432, user = "postgres", password = "password")
   return(con)
 }
-getConnection2 <- cmpfun(getConnection)2
+getConnection2 <- cmpfun(getConnection2)
 
 
 # all statistics 

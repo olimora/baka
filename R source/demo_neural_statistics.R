@@ -50,16 +50,3 @@ newrow <- modeval(cleanoutput[,3], cleanoutput[,2],
 #MSE, MAXAE
 
 statistics[(nrow(statistics) + 1) ,] <- unlist(newrow)
-
-install.packages('oce')
-library("oce")
-
-a <- sun.angle("2015-08-15 12:00:00", 48.593646, 19.374655)
-
-
-install.packages('insol')
-library("insol")
-
-hourangle(JDymd(2015,08,15,23,0,0), 19.374655, 1)
-
-sunpos(sunvector(JDymd(2015,08,15,14,0,0), 48.593646, 19.374655, 1))

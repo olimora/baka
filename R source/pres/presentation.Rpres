@@ -485,3 +485,51 @@ ggplot(df, aes(dataset, chyba, fill = metrika)) +
   #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
   scale_y_continuous(limits = c(0, 47))
 ```
+
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='obdobie metrika chyba
+ 1 leto SD 306
+ 2 leto RMSE  306
+ 3 leto MAE 229
+ 4 zima SD  286
+ 5 zima RMSE 286
+ 6 zima MAE  217
+ ')
+df$metrika <- factor(df$metrika, levels = c("RMSE", "MAE", "SD"))
+df$obdobie <- factor(df$obdobie, levels = c("leto", "zima"))
+library(ggplot2)
+ggplot(df, aes(obdobie, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Obdobie roka") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 340))
+```
+
+```{r, echo=FALSE}
+df  <- read.table(header = T, text='obdobie metrika chyba
+ 7 leto SD 44
+ 8 leto RMSE 44
+ 9 leto MAE 28
+ 10 zima SD 43
+ 11 zima RMSE 43
+ 12 zima MAE 28
+ ')
+df$metrika <- factor(df$metrika, levels = c("RMSE", "MAE", "SD"))
+df$obdobie <- factor(df$obdobie, levels = c("leto", "zima"))
+library(ggplot2)
+ggplot(df, aes(obdobie, chyba, fill = metrika)) + 
+ geom_bar(stat="identity", position = "dodge", show.legend = T) + 
+ scale_fill_brewer(palette = "Set1") +
+  geom_text(aes(label = chyba, y = chyba), 
+            position=position_dodge(width=0.9), vjust=-0.25, size = 9) + 
+  theme(text = element_text(size = 25)) +
+  xlab("Obdobie roka") +
+  ylab("Chyba") + 
+  #ggtitle("Porovnanie chyby predikcie podľa \n spôsobu výberu trénovacej množiny") + 
+  scale_y_continuous(limits = c(0, 48))
+```

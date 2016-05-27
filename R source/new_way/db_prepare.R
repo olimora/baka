@@ -3,7 +3,7 @@ library(RPostgreSQL)
 
 # nacitanie ovladaca, vytvorenie spojenia s databazou, 
 drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname = "test2_db", host = "localhost", 
+con <- dbConnect(drv, dbname = "test_db", host = "localhost", 
                  port = 5432, user = "postgres", password = "password")
 
 # pripravit tabulky

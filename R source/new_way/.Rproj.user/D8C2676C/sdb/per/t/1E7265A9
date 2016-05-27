@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "# vráti spojenie s databázou\ngetConnection <- function(drv) {\n  con <- dbConnect(drv, dbname = \"test_db\", host = \"localhost\", \n                   port = 5432, user = \"postgres\", password = \"password\")\n  return(con)\n}\n# výpočet štatistiky presnosti \nlibrary(Metrics)\nlibrary(sirad)\nall_statistics <- function(actual, predicted) {\n  mdval <- modeval(predicted, actual, stat=c(\"N\",\"MBE\",\"RMBE\",\"RMSE\",\"RRMSE\",\"MAE\",\"RMAE\",\"MPE\",\"SD\"),minlength=2)\n  mdval$MAXAE <- max(ae(actual, predicted))\n  return(mdval)\n}\n# formátovanie času\nformat.time <- function(x) UseMethod(\"format.time\")\nformat.time.difftime <- function(x) {\n  units(x) <- \"secs\"\n  x <- unclass(x)\n  NextMethod()\n}\nformat.time.default <- function(x) {\n  y <- abs(x)\n  sprintf(\"%s%02dh:%02dm:%02ds\", \n          ifelse(x < 0, \"-\", \"\"), # sign\n          y %% 86400 %/% 3600,  # hours \n          y %% 3600 %/% 60,  # minutes\n          y %% 60 %/% 1) # seconds\n}\n# vlastný operátor na spájanie reťazcov\n`%s%` <- function(s1, s2) paste0(s1, s2)\n",
+    "created" : 1462824708086.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2784420294",
+    "id" : "1E7265A9",
+    "lastKnownWriteTime" : 1462731282,
+    "last_content_update" : 1462731282,
+    "path" : "C:/Users/Oliver/Desktop/funkcie.r",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

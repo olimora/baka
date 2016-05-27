@@ -1,0 +1,33 @@
+Obsah CD média
+
+bakalarska_praca.pdf 	- elektronická verzia práce vo formáte .pdf
+bakalarska_praca.docx 	- elektronická verzia práce vo formáte .docx
+/SQL 			- prieèinok obsahuje SQL/PL funkcie pre vytvorenie schémy v databáze, 
+			  pre import dát do databázy a vytvorenie "views" nad viacerımi tabu¾kami
+/R_source		- prieèinok obsahuje finálne skripty v jazyku R pre pripravenie databázy a import dát,
+			  finálny skript predikcie a súbor s definíciou funkcií
+/ostatne		- prieèinok obsahuje textovı súbor pouívanı pre analızu vısledkov presnosti predikcie,
+			  skripty predikcie a definícií funkcií, ktoré sme pouívali poèas pokroku na práci
+popis.txt 		- tento súbor
+
+Poznámka: Niektoré èasti zdrojového kódu sme museli cenzurova znakmi "***", pretoe dáta z fotovoltaickıch elektrární, 
+s ktorımi sme pracovali sú citlivé a nesmieme konkretizova polohu alebo špeficikáciu elektrární. Z tohto dôvodu neprikladáme 
+ani dáta.
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+Content of CD media
+
+bakalarska_praca.pdf 	- electronic version of the thesis in .pdf format
+bakalarska_praca.docx	- electronic version of the thesis in .docx format
+/SQL 			- folder containing SQL/PL functions for creatint database scheme, 
+			  for import of the data and creating "views" over the tables
+/R_source		- folder containing final scripts in R language for preparing the database and import od the data,
+			  final script of prediction and file with functions definitions
+/ostatne		- folder contains text file used for prediction accuracy results analysis,
+			  prediction scripts and scripts witf definitions of functions used in thesis progress 
+popis.txt 		- this file
+
+Note: Some parts of source code had to be censored with "***" signs, because the data from photovoltaic power plants we used 
+are sensitive and we can not specify the location or any characteristics of those power plants. Therefore we dont include any data.
+
