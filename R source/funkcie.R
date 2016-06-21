@@ -1,3 +1,5 @@
+library("Metrics")
+
 #to compute numbers of weights
 compute_weigths_num <- function(input, layers) {
   ret <- 0
@@ -72,6 +74,7 @@ getConnection <- function(drv) {
 }
 
 library("Metrics")
+library("sirad")
 # all statistics 
 all_statistics <- function(actual, predicted) {
   mdval <- modeval(predicted, actual, stat=c("N","MBE","RMBE","RMSE","RRMSE","MAE","RMAE","MPE","SD"),minlength=4)
